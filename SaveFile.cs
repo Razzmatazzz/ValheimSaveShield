@@ -10,6 +10,7 @@ namespace ValheimSaveShield
     class SaveFile
     {
         private string filePath;
+        private DateTime backupDueTime;
 
         public SaveFile(string path)
         {
@@ -95,7 +96,43 @@ namespace ValheimSaveShield
         {
             get
             {
+                DateTime newBackupTime = this.BackupDueTime;
+                if (DateTime.Compare(DateTime.Now, newBackupTime) >= 0)
+                {
+                    return true;
+                }
                 return false;
+            }
+        }
+
+        public DateTime BackupDueTime
+        {
+            get
+            {
+                if (backupDueTime == null)
+                {
+                    string[] backups = Directory.GetDirectories(this.BackupsPath);
+                    SaveBackup latestBackup = null;
+                    foreach (string bdir in backups)
+                    {
+                        SaveBackup backup = new SaveBackup(bdir + "\\" + this.FileName);
+                        if (latestBackup == null || backup.SaveDate.Ticks > latestBackup.SaveDate.Ticks)
+                        {
+                            latestBackup = backup;
+                        }
+                    }
+                    DateTime latestBackupTime;
+                    if (latestBackup == null)
+                    {
+                        latestBackupTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                    }
+                    else
+                    {
+                        latestBackupTime = latestBackup.SaveDate;
+                    }
+                    this.backupDueTime = latestBackupTime.AddMinutes(Properties.Settings.Default.BackupMinutes);
+                }
+                return backupDueTime;
             }
         }
 

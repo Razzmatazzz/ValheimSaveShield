@@ -38,11 +38,10 @@ namespace ValheimSaveShield
         private Boolean suppressLog;
         private FileSystemWatcher worldWatcher;
         private FileSystemWatcher charWatcher;
-        private Process gameProcess;
 
         private System.Timers.Timer saveTimer;
         private DateTime lastUpdateCheck;
-        private int saveCount;
+        private SaveFile charSaveForBackup;
 
         public enum LogType
         {
@@ -86,6 +85,7 @@ namespace ValheimSaveShield
                 bool backedup = false;
                 foreach (string world in worlds)
                 {
+                    backedup = false;
                     string worldName = new FileInfo(world).Name.Split('.')[0];
                     DateTime saveDate = File.GetLastWriteTime(world);
                     for (int i = 0; i < listBackups.Count; i++)
@@ -204,7 +204,6 @@ namespace ValheimSaveShield
             // Add event handlers.
             worldWatcher.Changed += OnSaveFileChanged;
             worldWatcher.Created += OnSaveFileChanged;
-            //worldWatcher.Deleted += OnSaveFileChanged;
 
             charWatcher = new FileSystemWatcher();
             charWatcher.Path = saveDirPath + "\\characters";
@@ -218,14 +217,12 @@ namespace ValheimSaveShield
             // Add event handlers.
             charWatcher.Changed += OnSaveFileChanged;
             charWatcher.Created += OnSaveFileChanged;
-            //charWatcher.Deleted += OnSaveFileChanged;
 
             listBackups = new List<SaveBackup>();
 
             ((MenuItem)dataBackups.ContextMenu.Items[0]).Click += deleteMenuItem_Click;
 
             dataBackups.CanUserDeleteRows = false;
-            saveCount = 0;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -407,35 +404,6 @@ namespace ValheimSaveShield
 
         private void doBackup(string savepath)
         {
-            /*try
-            {
-                string type = "worlds";
-                string name = System.IO.Path.GetFileName(savepath).Split('.')[0];
-                if (savepath.StartsWith(saveDirPath + "\\characters\\")) type = "characters";
-                DateTime saveDate = File.GetLastWriteTime(savepath);
-                string backupFolder = backupDirPath + "\\" + type + "\\" +name+ "\\" + saveDate.Ticks;
-                if (!Directory.Exists(backupFolder))
-                {
-                    Directory.CreateDirectory(backupFolder);
-                }
-                string backupPath = backupFolder + "\\" + System.IO.Path.GetFileName(savepath);
-                File.Copy(savepath, backupPath, true);
-                SaveBackup backup = new SaveBackup(backupPath);
-                listBackups.Add(backup);
-                checkBackupLimits();
-                dataBackups.Items.Refresh();
-                this.BackupIsCurrent = true;
-                logMessage($"Backup of "+name+" completed ({saveDate.ToString()})!", LogType.Success);
-            }
-            catch (IOException ex)
-            {
-                if (ex.Message.Contains("being used by another process"))
-                {
-                    logMessage("Save file in use; waiting 0.5 seconds and retrying.");
-                    System.Threading.Thread.Sleep(500);
-                    doBackup(savepath);
-                }
-            }*/
             SaveFile save = new SaveFile(savepath);
             if (!save.BackedUp)
             {
@@ -526,6 +494,8 @@ namespace ValheimSaveShield
         {
             Properties.Settings.Default.AutoBackup = chkAutoBackup.IsChecked.HasValue ? chkAutoBackup.IsChecked.Value : false;
             Properties.Settings.Default.Save();
+            worldWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
+            charWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
         }
 
         /*private string getBackupPath(string savepath)
@@ -539,6 +509,11 @@ namespace ValheimSaveShield
             return backupDirPath + "\\" + type + "\\" + filename.Split('.')[0]+"\\"+new FileInfo(savepath).LastWriteTime.Ticks;
         }*/
 
+        private void backupSaveFile(string filePath)
+        {
+
+        }
+
         private void OnSaveFileChanged(object source, FileSystemEventArgs e)
         {
             // Specify what is done when a file is changed, created, or deleted.
@@ -549,53 +524,30 @@ namespace ValheimSaveShield
                     if (Properties.Settings.Default.AutoBackup)
                     {
                         SaveFile save = new SaveFile(e.FullPath);
-                        string[] backups = Directory.GetDirectories(save.BackupsPath);
-                        SaveBackup latestBackup = null;
-                        foreach (string bdir in backups)
+                        if (save.Type.Equals("World"))
                         {
-                            SaveBackup backup = new SaveBackup(bdir + "\\" + e.Name);
-                            if (latestBackup == null || backup.SaveDate.Ticks > latestBackup.SaveDate.Ticks)
+                            if (save.NeedsBackedUp)
                             {
-                                latestBackup = backup;
+                                doBackup(e.FullPath);
                             }
-                        }
-                        DateTime latestBackupTime;
-                        if (latestBackup == null)
-                        {
-                            latestBackupTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                            else
+                            {
+                                this.BackupIsCurrent = false;
+                                dataBackups.Items.Refresh();
+                                TimeSpan span = (save.BackupDueTime - DateTime.Now);
+                                logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
+                            }
                         } else
                         {
-                            latestBackupTime = latestBackup.SaveDate;
-                        }
-                        DateTime newBackupTime = latestBackupTime.AddMinutes(Properties.Settings.Default.BackupMinutes);
-                        if (DateTime.Compare(DateTime.Now, newBackupTime) >= 0)
-                        {
-                            doBackup(e.FullPath);
-                        }
-                        else
-                        {
-                            this.BackupIsCurrent = false;
-                            foreach (SaveBackup backup in listBackups)
-                            {
-                                //if (backup.Active) backup.Active = false;
-                            }
-                            dataBackups.Items.Refresh();
-                            TimeSpan span = (newBackupTime - DateTime.Now);
-                            logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
+                            //When character saves are modified, they are modified
+                            //two times in relatively rapid succession.
+                            //This timer is refreshed each time the save is modified,
+                            //and a backup only occurs after the timer expires.
+                            charSaveForBackup = save;
+                            saveTimer.Interval = 3000;
+                            saveTimer.Enabled = true;
                         }
                     }
-                    /*//When character saves are modified, they are modified
-                    //two times in relatively rapid succession.
-                    //This timer is refreshed each time the save is modified,
-                    //and a backup only occurs after the timer expires.
-                    saveTimer.Interval = 3000;
-                    saveTimer.Enabled = true;
-                    saveCount++;
-                    if (saveCount == 2)
-                    {
-                        updateCurrentWorldAnalyzer();
-                        saveCount = 0;
-                    }*/
                 }
                 catch (Exception ex)
                 {
@@ -610,60 +562,18 @@ namespace ValheimSaveShield
             {
                 try
                 {
-                    //logMessage($"{DateTime.Now.ToString()} File: {e.FullPath} {e.ChangeType}");
-                    /*if (Properties.Settings.Default.AutoBackup)
+                    if (charSaveForBackup.NeedsBackedUp)
                     {
-                        //logMessage($"Save: {File.GetLastWriteTime(e.FullPath)}; Last backup: {File.GetLastWriteTime(listBackups[listBackups.Count - 1].Save.SaveFolderPath + "\\profile.sav")}");
-                        DateTime latestBackupTime;
-                        DateTime newBackupTime;
-                        if (listBackups.Count > 0)
-                        {
-                            latestBackupTime = listBackups[listBackups.Count - 1].SaveDate;
-                            newBackupTime = latestBackupTime.AddMinutes(Properties.Settings.Default.BackupMinutes);
-                        }
-                        else
-                        {
-                            latestBackupTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                            newBackupTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                        }
-                        if (DateTime.Compare(DateTime.Now, newBackupTime) >= 0)
-                        {
-                            doBackup();
-                        }
-                        else
-                        {
-                            this.BackupIsCurrent = false;
-                            foreach (SaveBackup backup in listBackups)
-                            {
-                                //if (backup.Active) backup.Active = false;
-                            }
-                            dataBackups.Items.Refresh();
-                            TimeSpan span = (newBackupTime - DateTime.Now);
-                            logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
-                        }
+                        doBackup(charSaveForBackup.FullPath);
+                        charSaveForBackup = null;
                     }
-                    if (saveCount != 0)
+                    else
                     {
-                        updateCurrentWorldAnalyzer();
-                        saveCount = 0;
+                        this.BackupIsCurrent = false;
+                        dataBackups.Items.Refresh();
+                        TimeSpan span = (charSaveForBackup.BackupDueTime - DateTime.Now);
+                        logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
                     }
-
-                    if (gameProcess == null || gameProcess.HasExited)
-                    {
-                        Process[] processes = Process.GetProcessesByName("valheim.exe");
-                        if (processes.Length > 0)
-                        {
-                            gameProcess = processes[0];
-                            gameProcess.EnableRaisingEvents = true;
-                            gameProcess.Exited += (s, eargs) =>
-                            {
-                                this.Dispatcher.Invoke(() =>
-                                {
-                                    doBackup();
-                                });
-                            };
-                        }
-                    }*/
                 }
                 catch (Exception ex)
                 {
@@ -962,7 +872,7 @@ namespace ValheimSaveShield
 
         private void DataBackups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            MenuItem deleteMenu = ((MenuItem)dataBackups.ContextMenu.Items[1]);
+            MenuItem deleteMenu = ((MenuItem)dataBackups.ContextMenu.Items[0]);
             if (e.AddedItems.Count > 0)
             {
                 SaveBackup selectedBackup = (SaveBackup)(dataBackups.SelectedItem);

@@ -183,7 +183,7 @@ namespace ValheimSaveShield
 
         public void Restore()
         {
-            File.Copy(this.FullPath, this.ActivePath);
+            File.Copy(this.FullPath, this.ActivePath, true);
             if (this.Type.Equals("World"))
             {
                 FileInfo info = new FileInfo(this.FullPath);
