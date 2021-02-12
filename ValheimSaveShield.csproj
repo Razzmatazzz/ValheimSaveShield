@@ -138,6 +138,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="images\main_interface.png" />
+    <Resource Include="images\settings.png" />
     <Content Include="Resources\vss.ico" />
     <Resource Include="Resources\vss_32.png" />
     <Resource Include="SaveAll_32x.ico" />
