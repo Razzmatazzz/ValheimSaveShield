@@ -30,9 +30,11 @@ namespace ValheimSaveShield
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static string defaultBackupFolder = LocalLow + "\\IronGate\\Valheim\\backups";
+        //private static string defaultBackupFolder = LocalLow + "\\IronGate\\Valheim\\backups";
+        private static string defaultBackupFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\IronGate\\Valheim\\backups";
         private static string backupDirPath;
-        private static string defaultSaveFolder = LocalLow + "\\IronGate\\Valheim";
+        //private static string defaultSaveFolder = LocalLow + "\\IronGate\\Valheim";
+        private static string defaultSaveFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\AppData\\LocalLow\\IronGate\\Valheim";
         private static string saveDirPath;
         private List<SaveBackup> listBackups;
         private Boolean suppressLog;
@@ -50,7 +52,7 @@ namespace ValheimSaveShield
             Error
         }
 
-        private static string LocalLow
+        /*private static string LocalLow
         {
             get
             {
@@ -77,7 +79,7 @@ namespace ValheimSaveShield
         }
 
         [DllImport("shell32.dll")]
-        static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr pszPath);
+        static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr pszPath);*/
 
         private bool BackupIsCurrent {
             get {
@@ -496,22 +498,6 @@ namespace ValheimSaveShield
             Properties.Settings.Default.Save();
             worldWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
             charWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
-        }
-
-        /*private string getBackupPath(string savepath)
-        {
-            string type = "worlds";
-            if (savepath.StartsWith(backupDirPath + "\\characters\\"))
-            {
-                type = "characters";
-            }
-            string filename = System.IO.Path.GetFileName(savepath);
-            return backupDirPath + "\\" + type + "\\" + filename.Split('.')[0]+"\\"+new FileInfo(savepath).LastWriteTime.Ticks;
-        }*/
-
-        private void backupSaveFile(string filePath)
-        {
-
         }
 
         private void OnSaveFileChanged(object source, FileSystemEventArgs e)
@@ -1126,6 +1112,12 @@ namespace ValheimSaveShield
                 }
                 if (folderName.Equals(saveDirPath))
                 {
+                    return;
+                }
+                if (!Directory.Exists(folderName + "\\worlds") || !Directory.Exists(folderName+"\\characters"))
+                {
+                    MessageBox.Show("Please select the folder where your Valheim save files are located. This folder should contain a \"worlds\" and a \"characters\" folder..",
+                                     "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
                 }
                 txtSaveFolder.Text = folderName;
