@@ -1021,6 +1021,14 @@ namespace ValheimSaveShield
                 }
                 txtBackupFolder.Text = folderName;
                 backupDirPath = folderName;
+                if (!Directory.Exists($@"{backupDirPath}\worlds"))
+                {
+                    Directory.CreateDirectory($@"{backupDirPath}\worlds");
+                }
+                if (!Directory.Exists($@"{backupDirPath}\characters"))
+                {
+                    Directory.CreateDirectory($@"{backupDirPath}\characters");
+                }
                 Properties.Settings.Default.BackupFolder = folderName;
                 Properties.Settings.Default.Save();
                 loadBackups();
