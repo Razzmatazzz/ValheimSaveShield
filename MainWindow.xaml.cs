@@ -38,6 +38,7 @@ namespace ValheimSaveShield
         private static string saveDirPath;
         private List<SaveBackup> listBackups;
         private Boolean suppressLog;
+        private Color defaultTextColor;
         private FileSystemWatcher worldWatcher;
         private FileSystemWatcher charWatcher;
 
@@ -120,11 +121,15 @@ namespace ValheimSaveShield
         {
             InitializeComponent();
             suppressLog = false;
-            txtLog.Text = "Version " + typeof(MainWindow).Assembly.GetName().Version;
             if (Properties.Settings.Default.CreateLogFile)
             {
-                System.IO.File.WriteAllText("log.txt", DateTime.Now.ToString() + ": Version " + typeof(MainWindow).Assembly.GetName().Version + "\r\n");
+                System.IO.File.WriteAllText("log.txt", "");
             }
+            defaultTextColor = ((SolidColorBrush)txtLog.Foreground).Color;
+            Debug.WriteLine(defaultTextColor);
+            txtLog.IsReadOnly = true;
+            txtLog.Document.Blocks.Clear();
+            logMessage($"Version {typeof(MainWindow).Assembly.GetName().Version}");
             logMessage("Loading...");
             if (Properties.Settings.Default.UpgradeRequired)
             {
@@ -195,7 +200,8 @@ namespace ValheimSaveShield
             }
             else
             {
-                logMessage($@"Folder {saveDirPath}\characters does not exist. Please set the correct location of your save files.", LogType.Error);
+                Directory.CreateDirectory($@"{ saveDirPath}\characters");
+                //logMessage($@"Folder {saveDirPath}\characters does not exist. Please set the correct location of your save files.", LogType.Error);
             }
 
             // Watch for changes in LastWrite times.
@@ -338,19 +344,20 @@ namespace ValheimSaveShield
 
         public void logMessage(string msg)
         {
-            logMessage(msg, Colors.White);
+            logMessage(msg, defaultTextColor);
         }
 
         public void logMessage(string msg, LogType lt)
         {
-            Color color = Colors.White;
+            //Color color = Colors.White;
+            Color color = defaultTextColor;
             if (lt == LogType.Success)
             {
-                color = Color.FromRgb(0, 200, 0);
+                color = Color.FromRgb(50, 200, 50);
             }
             else if (lt == LogType.Error)
             {
-                color = Color.FromRgb(200, 0, 0);
+                color = Color.FromRgb(200, 50, 50);
             }
             logMessage(msg, color);
         }
@@ -359,10 +366,15 @@ namespace ValheimSaveShield
         {
             if (!suppressLog)
             {
-                txtLog.Text = txtLog.Text + Environment.NewLine + DateTime.Now.ToString() + ": " + msg;
+                //txtLog.Text = txtLog.Text + Environment.NewLine + DateTime.Now.ToString() + ": " + msg;
+                Run run = new Run(DateTime.Now.ToString() + ": " + msg);
+                run.Foreground = new SolidColorBrush(color);
+                Paragraph paragraph = new Paragraph(run);
+                paragraph.Margin = new Thickness(0);
+                txtLog.Document.Blocks.Add(paragraph);
                 lblLastMessage.Content = msg;
                 lblLastMessage.Foreground = new SolidColorBrush(color);
-                if (color.Equals(Colors.White))
+                if (color.Equals(defaultTextColor))
                 {
                     lblLastMessage.FontWeight = FontWeights.Normal;
                 }
@@ -385,6 +397,10 @@ namespace ValheimSaveShield
             foreach (string save in worlds)
             {
                 doBackup(save);
+            }
+            if (!Directory.Exists($@"{saveDirPath}\characters"))
+            {
+                Directory.CreateDirectory($@"{saveDirPath}\characters");
             }
             string[] characters = Directory.GetFiles($@"{saveDirPath}\characters", "*.fch");
             foreach (string save in characters)
@@ -1103,11 +1119,15 @@ namespace ValheimSaveShield
                 {
                     return;
                 }
-                if (!Directory.Exists($@"{folderName}\worlds") || !Directory.Exists($@"{folderName}\characters"))
+                if (!Directory.Exists($@"{folderName}\worlds"))
                 {
                     MessageBox.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder..",
                                      "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
+                }
+                if (!Directory.Exists($@"{folderName}\characters"))
+                {
+                    Directory.CreateDirectory($@"{folderName}\characters");
                 }
                 txtSaveFolder.Text = folderName;
                 saveDirPath = folderName;

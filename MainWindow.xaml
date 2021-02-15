@@ -82,7 +82,7 @@
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
                 <Grid>
-                    <TextBox x:Name="txtLog" TextWrapping="Wrap" Background="White" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="2"/>
+                    <RichTextBox x:Name="txtLog" Background="#FF4B4B4B" VerticalScrollBarVisibility="Auto" Grid.ColumnSpan="2" Foreground="White"/>
                 </Grid>
             </TabItem>
         </TabControl>
