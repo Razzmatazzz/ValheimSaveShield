@@ -1,27 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.IO;
 using System.Diagnostics;
-using System.Data;
 using System.Text.RegularExpressions;
-using System.Xml;
 using System.Threading;
 using System.Net;
-using ValheimSaveShield.Properties;
-using System.Windows.Markup;
-using System.Runtime.InteropServices;
 
 namespace ValheimSaveShield
 {
@@ -45,6 +33,8 @@ namespace ValheimSaveShield
         private System.Timers.Timer saveTimer;
         private DateTime lastUpdateCheck;
         private SaveFile charSaveForBackup;
+
+        private Thread ftpDirectorySync = null;
 
         public enum LogType
         {
@@ -117,6 +107,14 @@ namespace ValheimSaveShield
             }
         }
 
+        ~MainWindow()
+        {
+            if (ftpDirectorySync != null)
+            {
+                ftpDirectorySync.Abort();
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -162,10 +160,16 @@ namespace ValheimSaveShield
                 Properties.Settings.Default.BackupFolder = defaultBackupFolder;
                 Properties.Settings.Default.Save();
             }
+
             saveDirPath = Properties.Settings.Default.SaveFolder;
             txtSaveFolder.Text = saveDirPath;
             backupDirPath = Properties.Settings.Default.BackupFolder;
             txtBackupFolder.Text = backupDirPath;
+
+            txtFtpImport.Text = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
+
+            // start the directory syncing if user has the correct settings for it
+            syncDirectoriesAsync();
 
             chkCreateLogFile.IsChecked = Properties.Settings.Default.CreateLogFile;
 
@@ -1146,6 +1150,127 @@ namespace ValheimSaveShield
                 Properties.Settings.Default.SaveFolder = folderName;
                 Properties.Settings.Default.Save();
             }
+        }
+
+        private void btnFtpImport_Click(object sender, RoutedEventArgs e)
+        {
+            GetFtpSettings();
+
+            if (ftpDirectorySync == null)
+            {
+                System.Diagnostics.Debug.WriteLine("btnFtpImport_Click sync");
+                syncDirectoriesAsync();
+            }
+        }
+
+        private void syncDirectoriesAsync()
+        {
+            
+            // asynchronously sync local directory with ftp
+            ftpDirectorySync = new Thread(() => {
+                while (true)
+                {
+                    if (Properties.Settings.Default.FtpIpAddress.Length == 0
+                        || Properties.Settings.Default.FtpPort.Length == 0
+                        || Properties.Settings.Default.FtpFilePath.Length == 0
+                        || Properties.Settings.Default.SaveFolder.Length == 0
+                        || Properties.Settings.Default.FtpUsername.Length == 0
+                        || Properties.Settings.Default.FtpPassword.Length == 0
+                    )
+                    {
+                        System.Diagnostics.Debug.WriteLine("exiting sync thread");
+                        ftpDirectorySync = null;
+                        break;
+                    }
+
+                    System.Diagnostics.Debug.WriteLine("re-syncing");
+                    SynchronizeDirectories.remoteSync(
+                        Properties.Settings.Default.FtpIpAddress,
+                        Properties.Settings.Default.FtpPort,
+                        '/' + Properties.Settings.Default.FtpFilePath,
+                        Properties.Settings.Default.SaveFolder + "\\worlds",
+                        Properties.Settings.Default.FtpUsername,
+                        Properties.Settings.Default.FtpPassword
+                    );
+                    Thread.Sleep(Properties.Settings.Default.BackupMinutes * 60000);
+                }
+            });
+
+            if (ftpDirectorySync != null)
+            {
+                ftpDirectorySync.Start();
+            }
+        }
+
+        private bool GetFtpSettings()
+        {
+            System.Windows.Forms.Form prompt = new System.Windows.Forms.Form()
+            {
+                Width = 500,
+                Height = 500,
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                Text = "FTP Import",
+                StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+            };
+            System.Windows.Forms.Label ipLabel = new System.Windows.Forms.Label() { Left = 50, Top = 20, Text = "Server IP" };
+            System.Windows.Forms.TextBox ipBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 50, Width = 400 };
+            System.Windows.Forms.Label portLabel = new System.Windows.Forms.Label() { Left = 50, Top = 100, Text = "Port" };
+            System.Windows.Forms.TextBox portBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 130, Width = 400 };
+            System.Windows.Forms.Label filePathLabel = new System.Windows.Forms.Label() { Left = 50, Top = 180, Text = "Worlds Path" };
+            System.Windows.Forms.TextBox filePathBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 210, Width = 400 };
+            System.Windows.Forms.Label usernameLabel = new System.Windows.Forms.Label() { Left = 50, Top = 260, Text = "Username" };
+            System.Windows.Forms.TextBox usernameBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 290, Width = 400 };
+            System.Windows.Forms.Label passwordLabel = new System.Windows.Forms.Label() { Left = 50, Top = 340, Text = "Password" };
+            System.Windows.Forms.TextBox passwordBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 370, Width = 400 };
+
+            System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button() { Text = "Import Worlds", Left = 350, Width = 100, Top = 400, DialogResult = System.Windows.Forms.DialogResult.OK };
+            confirmation.Click += (sender, e) => { prompt.Close(); };
+
+            // load defaults
+            ipBox.Text = Properties.Settings.Default.FtpIpAddress;
+            portBox.Text = Properties.Settings.Default.FtpPort;
+            filePathBox.Text = Properties.Settings.Default.FtpFilePath;
+            usernameBox.Text = Properties.Settings.Default.FtpUsername;
+            passwordBox.Text = Properties.Settings.Default.FtpPassword;
+
+            prompt.Controls.Add(ipLabel);
+            prompt.Controls.Add(ipBox);
+            prompt.Controls.Add(portLabel);
+            prompt.Controls.Add(portBox);
+            prompt.Controls.Add(filePathLabel);
+            prompt.Controls.Add(filePathBox);
+            prompt.Controls.Add(usernameLabel);
+            prompt.Controls.Add(usernameBox);
+            prompt.Controls.Add(passwordLabel);
+            prompt.Controls.Add(passwordBox);
+
+            prompt.Controls.Add(confirmation);
+            prompt.AcceptButton = confirmation;
+
+            System.Windows.Forms.DialogResult dialog = prompt.ShowDialog();
+
+            if (dialog == System.Windows.Forms.DialogResult.OK)
+            {
+                if (filePathBox.Text.StartsWith("/"))
+                {
+                    filePathBox.Text = filePathBox.Text.Remove(0, 1);
+                }
+
+                if (filePathBox.Text.EndsWith("/"))
+                {
+                    filePathBox.Text = filePathBox.Text.Remove(filePathBox.Text.Length - 1, 1);
+                }
+
+                Properties.Settings.Default.FtpIpAddress = ipBox.Text;
+                Properties.Settings.Default.FtpPort = portBox.Text;
+                Properties.Settings.Default.FtpFilePath = filePathBox.Text;
+                Properties.Settings.Default.FtpUsername = usernameBox.Text;
+                Properties.Settings.Default.FtpPassword = passwordBox.Text;
+                Properties.Settings.Default.Save();
+
+                txtFtpImport.Text = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
+            }
+            return dialog == System.Windows.Forms.DialogResult.OK;
         }
     }
 }
