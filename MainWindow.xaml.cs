@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Net;
+using System.Windows.Documents;
 
 namespace ValheimSaveShield
 {
@@ -33,6 +34,8 @@ namespace ValheimSaveShield
         private System.Timers.Timer saveTimer;
         private DateTime lastUpdateCheck;
         private SaveFile charSaveForBackup;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+        private WindowState storedWindowState;
 
         private Thread ftpDirectorySync = null;
 
@@ -223,6 +226,20 @@ namespace ValheimSaveShield
             ((MenuItem)dataBackups.ContextMenu.Items[0]).Click += deleteMenuItem_Click;
 
             dataBackups.CanUserDeleteRows = false;
+
+            notifyIcon = new System.Windows.Forms.NotifyIcon();
+            notifyIcon.BalloonTipText = "VSS has been minimized. Click the tray icon to restore.";
+            notifyIcon.BalloonTipClicked += NotifyIcon_Click;
+            notifyIcon.Text = "Valheim Save Shield";
+            this.notifyIcon.Icon = ValheimSaveShield.Properties.Resources.vss;
+            notifyIcon.Click += NotifyIcon_Click;
+            storedWindowState = WindowState.Normal;
+        }
+
+        private void NotifyIcon_Click(object sender, EventArgs e)
+        {
+            Show();
+            WindowState = storedWindowState;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -979,7 +996,8 @@ namespace ValheimSaveShield
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            System.Environment.Exit(1);
+            notifyIcon.Dispose();
+            notifyIcon = null;
         }
 
         private void BtnBackupFolder_Click(object sender, RoutedEventArgs e)
@@ -1271,6 +1289,40 @@ namespace ValheimSaveShield
                 txtFtpImport.Text = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
             }
             return dialog == System.Windows.Forms.DialogResult.OK;
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                {
+                    Hide();
+                    if (notifyIcon != null)
+                    {
+                        notifyIcon.ShowBalloonTip(2000);
+                    }
+                }
+            }
+            else
+            {
+                storedWindowState = WindowState;
+            }
+        }
+
+        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            CheckTrayIcon();
+        }
+        void CheckTrayIcon()
+        {
+            ShowTrayIcon(!IsVisible);
+        }
+        void ShowTrayIcon(bool show)
+        {
+            if (notifyIcon != null)
+            {
+                notifyIcon.Visible = show;
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ValheimSaveShield"
         mc:Ignorable="d"
-        Title="Valheim Save Shield" Height="450" Width="800" Loaded="Window_Loaded" Icon="Resources/vss_32.png" Closing="Window_Closing" Closed="Window_Closed" Deactivated="Window_Deactivated" MinHeight="200" MinWidth="300">
+        Title="Valheim Save Shield" Height="450" Width="800" Loaded="Window_Loaded" Icon="Resources/vss_32.png" Closing="Window_Closing" Closed="Window_Closed" Deactivated="Window_Deactivated" MinHeight="200" MinWidth="300" StateChanged="Window_StateChanged" IsVisibleChanged="Window_IsVisibleChanged">
     <Window.Resources>
         <Image x:Key="Save" Height="22" Width="22" Source="Resources/Save_32x.png"/>
         <Image x:Key="SaveGrey" Height="22" Width="22" Source="Resources/Save_grey_32x.png"/>
