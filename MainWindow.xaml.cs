@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Net;
 using System.Windows.Documents;
+using ModernWpf;
 
 namespace ValheimSaveShield
 {
@@ -393,7 +394,13 @@ namespace ValheimSaveShield
                 Paragraph paragraph = new Paragraph(run);
                 paragraph.Margin = new Thickness(0);
                 txtLog.Document.Blocks.Add(paragraph);
-                lblLastMessage.Content = msg;
+                if (msg.Contains("\n"))
+                {
+                    lblLastMessage.Content = msg.Split('\n')[0];
+                } else
+                {
+                    lblLastMessage.Content = msg;
+                }
                 lblLastMessage.Foreground = new SolidColorBrush(color);
                 if (color.Equals(defaultTextColor))
                 {
@@ -998,6 +1005,8 @@ namespace ValheimSaveShield
         {
             notifyIcon.Dispose();
             notifyIcon = null;
+            ftpDirectorySync.Abort();
+            ftpDirectorySync = null;
         }
 
         private void BtnBackupFolder_Click(object sender, RoutedEventArgs e)
@@ -1172,12 +1181,13 @@ namespace ValheimSaveShield
 
         private void btnFtpImport_Click(object sender, RoutedEventArgs e)
         {
-            GetFtpSettings();
-
-            if (ftpDirectorySync == null)
+            // Only do something if user clicks OK
+            if (GetFtpSettings())
             {
-                System.Diagnostics.Debug.WriteLine("btnFtpImport_Click sync");
-                syncDirectoriesAsync();
+                if (ftpDirectorySync == null)
+                {
+                    syncDirectoriesAsync();
+                }
             }
         }
 
@@ -1186,37 +1196,68 @@ namespace ValheimSaveShield
             
             // asynchronously sync local directory with ftp
             ftpDirectorySync = new Thread(() => {
-                while (true)
+                try
                 {
-                    if (Properties.Settings.Default.FtpIpAddress.Length == 0
-                        || Properties.Settings.Default.FtpPort.Length == 0
-                        || Properties.Settings.Default.FtpFilePath.Length == 0
-                        || Properties.Settings.Default.SaveFolder.Length == 0
-                        || Properties.Settings.Default.FtpUsername.Length == 0
-                        || Properties.Settings.Default.FtpPassword.Length == 0
-                    )
+                    while (ftpDirectorySync != null)
                     {
-                        System.Diagnostics.Debug.WriteLine("exiting sync thread");
-                        ftpDirectorySync = null;
-                        break;
-                    }
+                        if (Properties.Settings.Default.FtpIpAddress.Length == 0
+                            || Properties.Settings.Default.FtpPort.Length == 0
+                            || Properties.Settings.Default.FtpFilePath.Length == 0
+                            || Properties.Settings.Default.SaveFolder.Length == 0
+                            || Properties.Settings.Default.FtpUsername.Length == 0
+                            || Properties.Settings.Default.FtpPassword.Length == 0
+                        )
+                        {
+                            System.Diagnostics.Debug.WriteLine("exiting sync thread");
+                            ftpDirectorySync = null;
+                            break;
+                        }
 
-                    System.Diagnostics.Debug.WriteLine("re-syncing");
-                    SynchronizeDirectories.remoteSync(
-                        Properties.Settings.Default.FtpIpAddress,
-                        Properties.Settings.Default.FtpPort,
-                        '/' + Properties.Settings.Default.FtpFilePath,
-                        Properties.Settings.Default.SaveFolder + "\\worlds",
-                        Properties.Settings.Default.FtpUsername,
-                        Properties.Settings.Default.FtpPassword
-                    );
-                    Thread.Sleep(Properties.Settings.Default.BackupMinutes * 60000);
+                        System.Diagnostics.Debug.WriteLine("re-syncing");
+                        int syncstatus = SynchronizeDirectories.remoteSync(
+                            Properties.Settings.Default.FtpIpAddress,
+                            Properties.Settings.Default.FtpPort,
+                            '/' + Properties.Settings.Default.FtpFilePath,
+                            Properties.Settings.Default.SaveFolder + "\\worlds",
+                            Properties.Settings.Default.FtpUsername,
+                            Properties.Settings.Default.FtpPassword
+                        );
+                        if (syncstatus == 0)
+                        {
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                logMessage("Successfully synced world saves from FTP server.", LogType.Success);
+                            });
+                        }
+                        else
+                        {
+                            this.Dispatcher.Invoke(() =>
+                            {
+                                logMessage($"Error syncing world saves from FTP server: {SynchronizeDirectories.LastError.Message}", LogType.Error);
+                            });
+                        }
+                        Thread.Sleep(Properties.Settings.Default.BackupMinutes * 60000);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        logMessage($"Error checking FTP server: {ex.Message}", LogType.Error);
+                    });
                 }
             });
 
-            if (ftpDirectorySync != null)
+            try
             {
-                ftpDirectorySync.Start();
+                if (ftpDirectorySync != null)
+                {
+                    ftpDirectorySync.Start();
+                }
+            } 
+            catch (Exception ex)
+            {
+                logMessage($"Error starting FTP sync thread: {ex.Message}");
             }
         }
 
@@ -1228,7 +1269,7 @@ namespace ValheimSaveShield
                 Height = 500,
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
                 Text = "FTP Import",
-                StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
+                StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
             };
             System.Windows.Forms.Label ipLabel = new System.Windows.Forms.Label() { Left = 50, Top = 20, Text = "Server IP" };
             System.Windows.Forms.TextBox ipBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 50, Width = 400 };

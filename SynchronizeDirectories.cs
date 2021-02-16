@@ -5,6 +5,14 @@ namespace ValheimSaveShield
 {
     public class SynchronizeDirectories
     {
+        private static Exception _lasterror;
+        public static Exception LastError
+        {
+            get
+            {
+                return _lasterror;
+            }
+        }
         public static int remoteSync(string hostUrl, string port, string hostDirectory, string localDirectory, string userName, string password)
         {
             try
@@ -42,6 +50,7 @@ namespace ValheimSaveShield
             }
             catch (Exception e)
             {
+                _lasterror = e;
                 System.Diagnostics.Debug.WriteLine("Error: {0}", e);
                 return 1;
             }

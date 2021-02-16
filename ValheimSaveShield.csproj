@@ -17,7 +17,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>C:\Users\Razz\Desktop\ValheimSaveShield\install\</PublishUrl>
+    <PublishUrl>C:\Users\Dan\Desktop\ValheimSaveShield\install\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -27,7 +27,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>19</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -72,11 +72,21 @@
     <StartupObject>ValheimSaveShield.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ModernWpf, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\ModernWpfUis.1.2.0\lib\net462\ModernWpf.dll</HintPath>
+    </Reference>
+    <Reference Include="ModernWpf.Controls, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\ModernWpfUis.1.2.0\lib\net462\ModernWpf.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="netstandard" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -173,8 +183,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetDir)ModernWpf.dll" "$(TargetDir)app.publish\"
+copy "$(TargetDir)ValheimSaveShield.exe.config" "$(TargetDir)app.publish\"
+copy "$(TargetDir)WinSCPnet.dll" "$(TargetDir)app.publish\"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\WinSCP.5.17.10\build\WinSCP.targets" Condition="Exists('packages\WinSCP.5.17.10\build\WinSCP.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
