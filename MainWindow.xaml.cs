@@ -1005,8 +1005,11 @@ namespace ValheimSaveShield
         {
             notifyIcon.Dispose();
             notifyIcon = null;
-            ftpDirectorySync.Abort();
-            ftpDirectorySync = null;
+            if (ftpDirectorySync != null)
+            {
+                ftpDirectorySync.Abort();
+                ftpDirectorySync = null;
+            }
         }
 
         private void BtnBackupFolder_Click(object sender, RoutedEventArgs e)
@@ -1143,7 +1146,7 @@ namespace ValheimSaveShield
         {
             System.Windows.Forms.FolderBrowserDialog openFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
             openFolderDialog.SelectedPath = saveDirPath;
-            openFolderDialog.Description = "Select where your Valheim saves are stored.";
+            openFolderDialog.Description = "Select where your Valheim saves are stored";
             System.Windows.Forms.DialogResult result = openFolderDialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
@@ -1160,7 +1163,7 @@ namespace ValheimSaveShield
                 }
                 if (!Directory.Exists($@"{folderName}\worlds"))
                 {
-                    MessageBox.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder..",
+                    MessageBox.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder.",
                                      "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
                 }
@@ -1340,7 +1343,12 @@ namespace ValheimSaveShield
                     Hide();
                     if (notifyIcon != null)
                     {
-                        notifyIcon.ShowBalloonTip(2000);
+                        if (Properties.Settings.Default.ShowMinimizeMessage)
+                        {
+                            notifyIcon.ShowBalloonTip(2000);
+                            Properties.Settings.Default.ShowMinimizeMessage = false;
+                            Properties.Settings.Default.Save();
+                        }
                     }
                 }
             }

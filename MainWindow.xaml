@@ -34,24 +34,28 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition x:Name="ForToolbar"  Height="37" />
+            <RowDefinition x:Name="ForToolbar"  Height="45" />
             <RowDefinition x:Name="ForBackups"  Height="*" />
             <RowDefinition x:Name="ForStatusbar" Height="37" />
         </Grid.RowDefinitions>
-        <ToolBarTray Background="{x:Null}" Grid.Row="0">
-            <ToolBar Band="1" BandIndex="1" Background="{x:Null}" VerticalAlignment="Top">
-                <Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" Click="BtnBackup_Click" Height="32" ToolTip="Backup current save" Margin="10,0" TabIndex="1">
-                    <DynamicResource ResourceKey="Save"/>
-                </Button>
-                <Button x:Name="btnRestore" HorizontalAlignment="Left" VerticalAlignment="Top" Width="32" IsEnabled="False" Click="BtnRestore_Click" ToolTip="Restore selected save backup" Height="32" Margin="10,0" TabIndex="2">
-                    <DynamicResource ResourceKey="RestoreGrey"/>
-                </Button>
-                <Separator Style="{DynamicResource VerticalSeparatorStyle}" />
-                <Button x:Name="btnOpenFolder" Width="32" Height="32" IsCancel="True" Click="BtnOpenFolder_Click" ToolTip="Open backups folder" Margin="10,0" TabIndex="4">
-                    <Image Height="22" Width="22" Source="Resources/OpenFolder_32x.png" ToolTip="Open backups folder"/>
-                </Button>
-            </ToolBar>
-        </ToolBarTray>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="50"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
+                <DynamicResource ResourceKey="Save"/>
+            </Button>
+            <Button x:Name="btnRestore" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="False" Click="BtnRestore_Click" ToolTip="Restore selected save backup" Margin="5" TabIndex="2" Grid.Column="1">
+                <DynamicResource ResourceKey="RestoreGrey"/>
+            </Button>
+            <Separator Style="{DynamicResource VerticalSeparatorStyle}" Grid.Column="2" />
+            <Button x:Name="btnOpenFolder" IsCancel="True" Click="BtnOpenFolder_Click" ToolTip="Open backups folder" Margin="5" TabIndex="4" Grid.Column="3">
+                <Image Height="22" Width="22" Source="Resources/OpenFolder_32x.png" ToolTip="Open backups folder"/>
+            </Button>
+        </Grid>
         <TabControl Grid.Row="1" TabIndex="5">
             <TabItem x:Name="tabBackups" Header="Backups">
                 <DataGrid x:Name="dataBackups" BeginningEdit="DataBackups_BeginningEdit" SelectionMode="Single" CellEditEnding="DataBackups_CellEditEnding" SelectionChanged="DataBackups_SelectionChanged" AutoGeneratingColumn="DataBackups_AutoGeneratingColumn">
@@ -79,9 +83,9 @@
                     <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,226,0,0" VerticalAlignment="Top" Click="chkCreateLogFile_Click" TabIndex="105"/>
                     <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,263,0,0" VerticalAlignment="Top" Click="chkAutoCheckUpdate_Click"/>
                     <Button x:Name="btnSaveFolder" Content="Save Folder" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" Width="109" Height="32" ToolTip="Only change if you know what you're doing!" Click="btnSaveFolder_Click"/>
-                    <TextBox x:Name="txtSaveFolder" Height="23" Margin="124,115,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="Where your Remnant saves are located"/>
+                    <TextBox x:Name="txtSaveFolder" Height="23" Margin="124,115,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="Where your Valheim saves are located"/>
                     <Button x:Name="btnFtpImport" Content="FTP Import" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="109" Height="32" ToolTip="Only change if you know what you're doing!" Click="btnFtpImport_Click"/>
-                    <TextBox x:Name="txtFtpImport" Height="23" Margin="124,152,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="Where your Remnant saves are located"/>
+                    <TextBox x:Name="txtFtpImport" Height="23" Margin="124,152,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="If you have a remote dedicated server with FTP access, you can back up that server's saves"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
