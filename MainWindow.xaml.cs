@@ -268,7 +268,6 @@ namespace ValheimSaveShield
                 checkForUpdate();
             }
             if (BackupIsCurrent) BackupIsCurrent = true;
-            Debug.WriteLine($"Enable raising events? {worldWatcher.EnableRaisingEvents}");
         }
 
         private void loadBackups()
@@ -539,7 +538,6 @@ namespace ValheimSaveShield
 
         private void OnSaveFileChanged(object source, FileSystemEventArgs e)
         {
-            Debug.WriteLine($"Save file changed: {e.Name}");
             // Specify what is done when a file is changed, created, or deleted.
             this.Dispatcher.Invoke(() =>
             {
