@@ -27,7 +27,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (this.saveData.label.Equals(""))
+                if (this.saveData.label == "")
                 {
                     return this.DefaultLabel;
                 }
@@ -38,7 +38,7 @@ namespace ValheimSaveShield
             }
             set
             {
-                if (value.Equals(""))
+                if (value == "")
                 {
                     this.saveData.label = this.DefaultLabel;
                 } else
@@ -184,7 +184,7 @@ namespace ValheimSaveShield
         public void Restore()
         {
             File.Copy(this.FullPath, this.ActivePath, true);
-            if (this.Type.Equals("World"))
+            if (this.Type == "World")
             {
                 FileInfo info = new FileInfo(this.FullPath);
                 FileInfo destInfo = new FileInfo(this.ActivePath);
@@ -217,15 +217,15 @@ namespace ValheimSaveShield
         {
             if (inTxn)
             {
-                if (!backupData.label.Equals(saveData.label))
+                if (backupData.label !=saveData.label)
                 {
                     OnUpdated(new UpdatedEventArgs("Label"));
                 }
-                if (!backupData.date.Equals(saveData.date))
+                if (backupData.date != saveData.date)
                 {
                     OnUpdated(new UpdatedEventArgs("SaveDate"));
                 }
-                if (!backupData.keep.Equals(saveData.keep))
+                if (backupData.keep != saveData.keep)
                 {
                     OnUpdated(new UpdatedEventArgs("Keep"));
                 }

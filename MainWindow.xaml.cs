@@ -128,11 +128,9 @@ namespace ValheimSaveShield
                 System.IO.File.WriteAllText("log.txt", "");
             }
             defaultTextColor = ((SolidColorBrush)txtLog.Foreground).Color;
-            Debug.WriteLine(defaultTextColor);
             txtLog.IsReadOnly = true;
             txtLog.Document.Blocks.Clear();
             logMessage($"Version {typeof(MainWindow).Assembly.GetName().Version}");
-            logMessage("Loading...");
             if (Properties.Settings.Default.UpgradeRequired)
             {
                 Properties.Settings.Default.Upgrade();
@@ -192,7 +190,7 @@ namespace ValheimSaveShield
             }
 
             // Watch for changes in LastWrite times.
-            worldWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            worldWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
 
             // Only watch .db files.
             worldWatcher.Filter = "*.db";
@@ -213,7 +211,7 @@ namespace ValheimSaveShield
             }
 
             // Watch for changes in LastWrite times.
-            charWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            charWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
 
             // Only watch .db files.
             charWatcher.Filter = "*.fch";
@@ -258,11 +256,11 @@ namespace ValheimSaveShield
 
             if (!worldWatcher.Path.Equals(""))
             {
-                worldWatcher.EnableRaisingEvents = true;
+                worldWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
             }
             if (!charWatcher.Path.Equals(""))
             {
-                charWatcher.EnableRaisingEvents = true;
+                charWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
             }
 
             if (Properties.Settings.Default.AutoCheckUpdate)
@@ -270,6 +268,7 @@ namespace ValheimSaveShield
                 checkForUpdate();
             }
             if (BackupIsCurrent) BackupIsCurrent = true;
+            Debug.WriteLine($"Enable raising events? {worldWatcher.EnableRaisingEvents}");
         }
 
         private void loadBackups()
@@ -335,10 +334,10 @@ namespace ValheimSaveShield
             }
             listBackups.Sort();
             dataBackups.ItemsSource = listBackups;
-            logMessage($"Backups found: {listBackups.Count}");
+            //logMessage($"Backups found: {listBackups.Count}");
             if (listBackups.Count > 0)
             {
-                logMessage("Last backup save date: " + listBackups[listBackups.Count - 1].SaveDate.ToString());
+                //logMessage("Last backup save date: " + listBackups[listBackups.Count - 1].SaveDate.ToString());
             }
 
             //dataBackups.SelectedItem = activeBackup;
@@ -540,6 +539,7 @@ namespace ValheimSaveShield
 
         private void OnSaveFileChanged(object source, FileSystemEventArgs e)
         {
+            Debug.WriteLine($"Save file changed: {e.Name}");
             // Specify what is done when a file is changed, created, or deleted.
             this.Dispatcher.Invoke(() =>
             {
@@ -1175,8 +1175,8 @@ namespace ValheimSaveShield
                 saveDirPath = folderName;
                 worldWatcher.Path = $@"{saveDirPath}\worlds";
                 charWatcher.Path = $@"{saveDirPath}\characters";
-                worldWatcher.EnableRaisingEvents = true;
-                charWatcher.EnableRaisingEvents = true;
+                worldWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
+                charWatcher.EnableRaisingEvents = Properties.Settings.Default.AutoBackup;
                 Properties.Settings.Default.SaveFolder = folderName;
                 Properties.Settings.Default.Save();
             }
