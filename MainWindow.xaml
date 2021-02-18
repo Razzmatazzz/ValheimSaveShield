@@ -15,45 +15,23 @@
         <Image x:Key="RestoreGrey" Height="22" Width="22" Source="Resources/Undo_grey_32x.png"/>
         <Image x:Key="StatusOK" Height="16" Width="16" Source="Resources/StatusOK_32x.png"/>
         <Image x:Key="StatusNo" Height="16" Width="16" Source="Resources/StatusNo_32x.png"/>
-        <Style x:Key="VerticalSeparatorStyle"
-       TargetType="{x:Type Separator}"
-       BasedOn="{StaticResource {x:Type Separator}}">
-            <Setter Property="Margin" Value="6,0,6,0"/>
-            <Setter Property="LayoutTransform">
-                <Setter.Value>
-                    <TransformGroup>
-                        <TransformGroup.Children>
-                            <TransformCollection>
-                                <RotateTransform Angle="90"/>
-                            </TransformCollection>
-                        </TransformGroup.Children>
-                    </TransformGroup>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition x:Name="ForToolbar"  Height="45" />
             <RowDefinition x:Name="ForBackups"  Height="*" />
-            <RowDefinition x:Name="ForStatusbar" Height="37" />
+            <RowDefinition x:Name="ForStatusbar" Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
                 <DynamicResource ResourceKey="Save"/>
             </Button>
             <Button x:Name="btnRestore" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="False" Click="BtnRestore_Click" ToolTip="Restore selected save backup" Margin="5" TabIndex="2" Grid.Column="1">
                 <DynamicResource ResourceKey="RestoreGrey"/>
-            </Button>
-            <Separator Style="{DynamicResource VerticalSeparatorStyle}" Grid.Column="2" />
-            <Button x:Name="btnOpenFolder" IsCancel="True" Click="BtnOpenFolder_Click" ToolTip="Open backups folder" Margin="5" TabIndex="4" Grid.Column="3">
-                <Image Height="22" Width="22" Source="Resources/OpenFolder_32x.png" ToolTip="Open backups folder"/>
             </Button>
         </Grid>
         <TabControl Grid.Row="1" TabIndex="5">
@@ -72,20 +50,54 @@
             </TabItem>
             <TabItem x:Name="tabSettings" Header="Settings">
                 <Grid>
-                    <CheckBox x:Name="chkAutoBackup" Content="Automatically backup save files" ToolTip="Monitor save files and back them up when they're changed" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="ChkAutoBackup_Click" TabIndex="101"/>
-                    <TextBox x:Name="txtBackupMins" HorizontalAlignment="Left" Height="23" Margin="10,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="64" LostFocus="TxtBackupMins_LostFocus" KeyUp="TxtBackupMins_KeyUp" TabIndex="102"/>
-                    <Label Content="Minutes between backups" ToolTip="Minimum amount of time that must have passed since last backup before a new backup is made" HorizontalAlignment="Left" Margin="90,50,0,0" VerticalAlignment="Top"/>
-                    <TextBox x:Name="txtBackupLimit" HorizontalAlignment="Left" Height="23" Margin="10,78,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="64" KeyUp="TxtBackupLimit_KeyUp" LostFocus="TxtBackupLimit_LostFocus" TabIndex="103"/>
-                    <Label Content="Backups to keep (0 for unlimited)" ToolTip="When the number of backups for a world or character reaches this number, backups will automatically be deleted starting with the oldest" HorizontalAlignment="Left" Margin="90,84,0,0" VerticalAlignment="Top" />
-                    <TextBox x:Name="txtBackupFolder" ToolTip="Where your save backups are stored" Height="23" Margin="124,189,10,0" TextWrapping="Wrap" VerticalAlignment="Top" IsReadOnly="True" TabIndex="-1" IsTabStop="False"/>
-                    <Button x:Name="btnBackupFolder" Content="Backup Folder" HorizontalAlignment="Left" Margin="10,189,0,0" VerticalAlignment="Top" Click="BtnBackupFolder_Click" MinWidth="75" MinHeight="20" TabIndex="104" Height="32" Width="109"/>
-                    <Button x:Name="btnGameInfoUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="235,262,0,0" VerticalAlignment="Top" Click="btnGameInfoUpdate_Click" MinWidth="113" MinHeight="20" TabIndex="106" Height="33"/>
-                    <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,226,0,0" VerticalAlignment="Top" Click="chkCreateLogFile_Click" TabIndex="105"/>
-                    <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,263,0,0" VerticalAlignment="Top" Click="chkAutoCheckUpdate_Click"/>
-                    <Button x:Name="btnSaveFolder" Content="Save Folder" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" Width="109" Height="32" ToolTip="Only change if you know what you're doing!" Click="btnSaveFolder_Click"/>
-                    <TextBox x:Name="txtSaveFolder" Height="23" Margin="124,115,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="Where your Valheim saves are located"/>
-                    <Button x:Name="btnFtpImport" Content="FTP Import" HorizontalAlignment="Left" Margin="10,152,0,0" VerticalAlignment="Top" Width="109" Height="32" ToolTip="Only change if you know what you're doing!" Click="btnFtpImport_Click"/>
-                    <TextBox x:Name="txtFtpImport" Height="23" Margin="124,152,10,0" TextWrapping="Wrap" VerticalAlignment="Top" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="If you have a remote dedicated server with FTP access, you can back up that server's saves"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox x:Name="chkAutoBackup" Content="Automatically backup save files" ToolTip="Monitor save files and back them up when they're changed" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Top" Click="ChkAutoBackup_Click" Grid.Row="0" Grid.ColumnSpan="2" TabIndex="101"/>
+                    <TextBox x:Name="txtBackupMins" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2" Width="64" LostFocus="TxtBackupMins_LostFocus" KeyUp="TxtBackupMins_KeyUp" TabIndex="102"/>
+                    <Label Content="Minutes between backups" ToolTip="Minimum amount of time that must have passed since last backup before a new backup is made" HorizontalAlignment="Left" Margin="90,2,0,2" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2"/>
+                    <TextBox x:Name="txtBackupLimit" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Width="64" Grid.Row="2" Grid.ColumnSpan="2" KeyUp="TxtBackupLimit_KeyUp" LostFocus="TxtBackupLimit_LostFocus" TabIndex="103"/>
+                    <Label Content="Backups to keep (0 for unlimited)" ToolTip="When the number of backups for a world or character reaches this number, backups will automatically be deleted starting with the oldest" HorizontalAlignment="Left" Margin="90,2,0,2" VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" />
+                    <Button x:Name="btnSaveFolder" Content="Save Folder" HorizontalAlignment="Stretch" Margin="10,2,10,2" VerticalAlignment="Center" ToolTip="Only change if you know what you're doing!" Click="btnSaveFolder_Click" Grid.Row="3" Grid.Column="0"/>
+                    <TextBox x:Name="txtSaveFolder" Height="23" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="Where your Valheim saves are located" Grid.Row="3" Grid.Column="1">
+                        <TextBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem x:Name="menuSavePathOpen" Header="Open in Windows Explorer" Click="menuSavePathOpen_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="Resources/OpenFolder_32x.png"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TextBox.ContextMenu>
+                    </TextBox>
+                    <Button x:Name="btnBackupFolder" Content="Backup Folder" HorizontalAlignment="Left" Margin="10,2,10,2" VerticalAlignment="Center" Click="BtnBackupFolder_Click" TabIndex="104" Grid.Row="4" Grid.Column="0" />
+                    <TextBox x:Name="txtBackupFolder" ToolTip="Where your save backups are stored" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" IsReadOnly="True" TabIndex="-1" IsTabStop="False" Grid.Row="4" Grid.Column="1">
+                        <TextBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem x:Name="menuBackupPathOpen" Header="Open in Windows Explorer" Click="menuBackupPathOpen_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="Resources/OpenFolder_32x.png"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TextBox.ContextMenu>
+                    </TextBox>
+                    <Button x:Name="btnFtpImport" Content="FTP Import" HorizontalAlignment="Stretch" Margin="10,2,10,2" VerticalAlignment="Center" ToolTip="Only change if you know what you're doing!" Click="btnFtpImport_Click" Grid.Row="5" Grid.Column="0"/>
+                    <TextBox x:Name="txtFtpImport" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="If you have a remote dedicated server with FTP access, you can back up that server's saves" Grid.Row="5" Grid.Column="1"/>
+                    <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Click="chkCreateLogFile_Click" TabIndex="105" Grid.Row="6" Grid.ColumnSpan="2"/>
+                    <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Click="chkAutoCheckUpdate_Click" Grid.Row="7" Grid.ColumnSpan="2"/>
+                    <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="250,5,0,5" VerticalAlignment="Center" Click="btnAppUpdate_Click" TabIndex="106" Grid.Row="7" Grid.ColumnSpan="2" />
                 </Grid>
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
@@ -94,9 +106,9 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <StatusBar Background="{x:Null}" Grid.Row="2">
+        <StatusBar Grid.Row="2">
             <StatusBarItem HorizontalAlignment="Left">
-                <Label x:Name="lblStatus" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Not backed up" Height="26" VerticalContentAlignment="Center">
+                <Label x:Name="lblStatus" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0" ToolTip="Not backed up" Height="26" VerticalContentAlignment="Center">
                     <DynamicResource ResourceKey="StatusNo"/>
                 </Label>
             </StatusBarItem>

@@ -272,74 +272,90 @@ namespace ValheimSaveShield
 
         private void loadBackups()
         {
-            if (!Directory.Exists(backupDirPath))
+            try
             {
-                logMessage("Backups folder not found, creating...");
-                Directory.CreateDirectory(backupDirPath);
-                Directory.CreateDirectory($@"{backupDirPath}\worlds");
-                Directory.CreateDirectory($@"{backupDirPath}\characters");
-            }
-            dataBackups.ItemsSource = null;
-            listBackups.Clear();
-            Dictionary<long, string> backupWorldNames = getBackupNames("World");
-            Dictionary<long, bool> backupWorldKeeps = getBackupKeeps("World");
-            
-            string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds");
-            foreach (string w in worldBackups)
-            {
-                string name = w.Replace($@"{backupDirPath}\worlds", "");
-                string[] backupDirs = Directory.GetDirectories(w);
-                foreach (string backupDir in backupDirs)
+                if (!Directory.Exists(backupDirPath))
                 {
-                    SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.db");
-                    if (backupWorldNames.ContainsKey(backup.SaveDate.Ticks))
+                    logMessage("Backups folder not found, creating...");
+                    Directory.CreateDirectory(backupDirPath);
+                    Directory.CreateDirectory($@"{backupDirPath}\worlds");
+                    Directory.CreateDirectory($@"{backupDirPath}\characters");
+                }
+                else
+                {
+                    if (!Directory.Exists($@"{backupDirPath}\worlds"))
                     {
-                        backup.Label = backupWorldNames[backup.SaveDate.Ticks];
+                        Directory.CreateDirectory($@"{backupDirPath}\worlds");
                     }
-                    if (backupWorldKeeps.ContainsKey(backup.SaveDate.Ticks))
+                    if (!Directory.Exists($@"{backupDirPath}\characters"))
                     {
-                        backup.Keep = backupWorldKeeps[backup.SaveDate.Ticks];
+                        Directory.CreateDirectory($@"{backupDirPath}\characters");
                     }
+                }
 
-                    backup.Updated += saveUpdated;
+                dataBackups.ItemsSource = null;
+                listBackups.Clear();
+                Dictionary<long, string> backupWorldNames = getBackupNames("World");
+                Dictionary<long, bool> backupWorldKeeps = getBackupKeeps("World");
 
-                    listBackups.Add(backup);
+                string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds");
+                foreach (string w in worldBackups)
+                {
+                    string name = w.Replace($@"{backupDirPath}\worlds", "");
+                    string[] backupDirs = Directory.GetDirectories(w);
+                    foreach (string backupDir in backupDirs)
+                    {
+                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.db");
+                        if (backupWorldNames.ContainsKey(backup.SaveDate.Ticks))
+                        {
+                            backup.Label = backupWorldNames[backup.SaveDate.Ticks];
+                        }
+                        if (backupWorldKeeps.ContainsKey(backup.SaveDate.Ticks))
+                        {
+                            backup.Keep = backupWorldKeeps[backup.SaveDate.Ticks];
+                        }
+
+                        backup.Updated += saveUpdated;
+
+                        listBackups.Add(backup);
+                    }
+                }
+
+                Dictionary<long, string> backupCharNames = getBackupNames("Character");
+                Dictionary<long, bool> backupCharKeeps = getBackupKeeps("Character");
+                string[] charBackups = Directory.GetDirectories($@"{backupDirPath}\characters");
+                foreach (string c in charBackups)
+                {
+                    string name = c.Replace($@"{backupDirPath}\characters", "");
+                    string[] backupDirs = Directory.GetDirectories(c);
+                    foreach (string backupDir in backupDirs)
+                    {
+                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.fch");
+                        if (backupCharNames.ContainsKey(backup.SaveDate.Ticks))
+                        {
+                            backup.Label = backupCharNames[backup.SaveDate.Ticks];
+                        }
+                        if (backupCharKeeps.ContainsKey(backup.SaveDate.Ticks))
+                        {
+                            backup.Keep = backupCharKeeps[backup.SaveDate.Ticks];
+                        }
+
+                        backup.Updated += saveUpdated;
+
+                        listBackups.Add(backup);
+                    }
+                }
+                listBackups.Sort();
+                dataBackups.ItemsSource = listBackups;
+                if (listBackups.Count > 0)
+                {
+                    //logMessage("Last backup save date: " + listBackups[listBackups.Count - 1].SaveDate.ToString());
                 }
             }
-
-            Dictionary<long, string> backupCharNames = getBackupNames("Character");
-            Dictionary<long, bool> backupCharKeeps = getBackupKeeps("Character");
-            string[] charBackups = Directory.GetDirectories($@"{backupDirPath}\characters");
-            foreach (string c in charBackups)
+            catch (Exception ex)
             {
-                string name = c.Replace($@"{backupDirPath}\characters", "");
-                string[] backupDirs = Directory.GetDirectories(c);
-                foreach (string backupDir in backupDirs)
-                {
-                    SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.fch");
-                    if (backupCharNames.ContainsKey(backup.SaveDate.Ticks))
-                    {
-                        backup.Label = backupCharNames[backup.SaveDate.Ticks];
-                    }
-                    if (backupCharKeeps.ContainsKey(backup.SaveDate.Ticks))
-                    {
-                        backup.Keep = backupCharKeeps[backup.SaveDate.Ticks];
-                    }
-
-                    backup.Updated += saveUpdated;
-
-                    listBackups.Add(backup);
-                }
+                logMessage($"Error loading backups: {ex.Message}", LogType.Error);
             }
-            listBackups.Sort();
-            dataBackups.ItemsSource = listBackups;
-            //logMessage($"Backups found: {listBackups.Count}");
-            if (listBackups.Count > 0)
-            {
-                //logMessage("Last backup save date: " + listBackups[listBackups.Count - 1].SaveDate.ToString());
-            }
-
-            //dataBackups.SelectedItem = activeBackup;
         }
 
         private void saveUpdated(object sender, UpdatedEventArgs args)
@@ -740,16 +756,6 @@ namespace ValheimSaveShield
             }
         }
 
-        private void BtnOpenFolder_Click(object sender, RoutedEventArgs e)
-        {
-            if (!Directory.Exists(backupDirPath))
-            {
-                logMessage("Backups folder not found, creating...");
-                Directory.CreateDirectory(backupDirPath);
-            }
-            Process.Start(backupDirPath+"\\");
-        }
-
         private Dictionary<long, string> getBackupNames(string type)
         {
             Dictionary<long, string> names = new Dictionary<long, string>();
@@ -1102,7 +1108,7 @@ namespace ValheimSaveShield
             }
         }
 
-        private void btnGameInfoUpdate_Click(object sender, RoutedEventArgs e)
+        private void btnAppUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (lastUpdateCheck.AddMinutes(10) < DateTime.Now)
             {
@@ -1370,6 +1376,26 @@ namespace ValheimSaveShield
             {
                 notifyIcon.Visible = show;
             }
+        }
+
+        private void menuSavePathOpen_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists(saveDirPath))
+            {
+                logMessage("Save path not found, please select a valid path for your save files.");
+                return;
+            }
+            Process.Start(saveDirPath + "\\");
+        }
+
+        private void menuBackupPathOpen_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Directory.Exists(backupDirPath))
+            {
+                logMessage("Backups folder not found, creating...");
+                Directory.CreateDirectory(backupDirPath);
+            }
+            Process.Start(backupDirPath + "\\");
         }
     }
 }
