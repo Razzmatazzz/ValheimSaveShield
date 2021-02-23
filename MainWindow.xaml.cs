@@ -12,6 +12,7 @@ using System.Threading;
 using System.Net;
 using System.Windows.Documents;
 using ModernWpf;
+using System.Timers;
 
 namespace ValheimSaveShield
 {
@@ -32,9 +33,10 @@ namespace ValheimSaveShield
         private FileSystemWatcher worldWatcher;
         private FileSystemWatcher charWatcher;
 
-        private System.Timers.Timer saveTimer;
+        private Dictionary<string, SaveTimer> saveTimers;
+        //private System.Timers.Timer saveTimer;
         private DateTime lastUpdateCheck;
-        private SaveFile charSaveForBackup;
+        //private SaveFile charSaveForBackup;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private WindowState storedWindowState;
 
@@ -47,48 +49,29 @@ namespace ValheimSaveShield
             Error
         }
 
-        private bool BackupIsCurrent {
+        private bool IsBackupCurrent {
             get {
                 if (!Directory.Exists($@"{saveDirPath}\worlds"))
                 {
                     return false;
                 }
                 var worlds = Directory.GetFiles($@"{saveDirPath}\worlds", "*.db");
-                bool backedup = false;
                 foreach (string world in worlds)
                 {
-                    backedup = false;
-                    string worldName = new FileInfo(world).Name.Split('.')[0];
-                    DateTime saveDate = File.GetLastWriteTime(world);
-                    for (int i = 0; i < listBackups.Count; i++)
+                    SaveFile save = new SaveFile(world);
+                    if (!save.BackedUp)
                     {
-                        SaveBackup b = listBackups.ToArray()[i];
-                        DateTime backupDate = b.SaveDate;
-                        if (saveDate.Equals(backupDate) && b.Type.Equals("World") && b.Name.Equals(worldName))
-                        {
-                            backedup = true;
-                            break;
-                        }
+                        return false;
                     }
-                    if (!backedup) return false;
                 }
-                backedup = false;
                 var characters = Directory.GetFiles($@"{saveDirPath}\characters", "*.fch");
                 foreach (string character in characters)
                 {
-                    string charName = new FileInfo(character).Name.Split('.')[0];
-                    DateTime saveDate = File.GetLastWriteTime(character);
-                    for (int i = 0; i < listBackups.Count; i++)
+                    SaveFile save = new SaveFile(character);
+                    if (!save.BackedUp)
                     {
-                        SaveBackup b = listBackups.ToArray()[i];
-                        DateTime backupDate = b.SaveDate;
-                        if (saveDate.Equals(backupDate) && b.Type.Equals("Character") && b.Name.Equals(charName))
-                        {
-                            backedup = true;
-                            break;
-                        }
+                        return false;
                     }
-                    if (!backedup) return false;
                 }
                 return true;
             }
@@ -175,10 +158,11 @@ namespace ValheimSaveShield
 
             chkCreateLogFile.IsChecked = Properties.Settings.Default.CreateLogFile;
 
-            saveTimer = new System.Timers.Timer();
+            saveTimers = new Dictionary<string, SaveTimer>();
+            /*saveTimer = new System.Timers.Timer();
             saveTimer.Interval = 2000;
             saveTimer.AutoReset = false;
-            saveTimer.Elapsed += OnSaveTimerElapsed;
+            saveTimer.Elapsed += OnSaveTimerElapsed;*/
 
             worldWatcher = new FileSystemWatcher();
             if (Directory.Exists($@"{saveDirPath}\worlds"))
@@ -190,7 +174,7 @@ namespace ValheimSaveShield
             }
 
             // Watch for changes in LastWrite times.
-            worldWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            worldWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;
 
             // Only watch .db files.
             worldWatcher.Filter = "*.db";
@@ -198,20 +182,21 @@ namespace ValheimSaveShield
             // Add event handlers.
             worldWatcher.Changed += OnSaveFileChanged;
             worldWatcher.Created += OnSaveFileChanged;
+            worldWatcher.Renamed += OnSaveFileChanged;
 
             charWatcher = new FileSystemWatcher();
-            if (Directory.Exists($@"{ saveDirPath}\characters"))
+            if (Directory.Exists($@"{saveDirPath}\characters"))
             {
                 charWatcher.Path = $@"{saveDirPath}\characters";
             }
             else
             {
-                Directory.CreateDirectory($@"{ saveDirPath}\characters");
+                Directory.CreateDirectory($@"{saveDirPath}\characters");
                 //logMessage($@"Folder {saveDirPath}\characters does not exist. Please set the correct location of your save files.", LogType.Error);
             }
 
-            // Watch for changes in LastWrite times.
-            charWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+            // Watch for changes in LastWrite and file creation times.
+            charWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;
 
             // Only watch .db files.
             charWatcher.Filter = "*.fch";
@@ -219,6 +204,7 @@ namespace ValheimSaveShield
             // Add event handlers.
             charWatcher.Changed += OnSaveFileChanged;
             charWatcher.Created += OnSaveFileChanged;
+            charWatcher.Renamed += OnSaveFileChanged;
 
             listBackups = new List<SaveBackup>();
 
@@ -267,7 +253,7 @@ namespace ValheimSaveShield
             {
                 checkForUpdate();
             }
-            if (BackupIsCurrent) BackupIsCurrent = true;
+            if (IsBackupCurrent) IsBackupCurrent = true;
         }
 
         private void loadBackups()
@@ -297,7 +283,6 @@ namespace ValheimSaveShield
                 listBackups.Clear();
                 Dictionary<long, string> backupWorldNames = getBackupNames("World");
                 Dictionary<long, bool> backupWorldKeeps = getBackupKeeps("World");
-
                 string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds");
                 foreach (string w in worldBackups)
                 {
@@ -449,10 +434,7 @@ namespace ValheimSaveShield
             {
                 doBackup(save);
             }
-            if (this.BackupIsCurrent)
-            {
-                this.BackupIsCurrent = true;
-            }
+            this.IsBackupCurrent = this.IsBackupCurrent;
             //doBackup();
         }
 
@@ -461,21 +443,25 @@ namespace ValheimSaveShield
             SaveFile save = new SaveFile(savepath);
             if (!save.BackedUp)
             {
-                SaveBackup backup = save.PerformBackup();
-                if (backup != null)
+                try
                 {
-                    listBackups.Add(backup);
-                    checkBackupLimits();
-                    dataBackups.Items.Refresh();
-                    if (this.BackupIsCurrent)
+                    SaveBackup backup = save.PerformBackup();
+                    if (backup != null)
                     {
-                        this.BackupIsCurrent = true;
+                        listBackups.Add(backup);
+                        checkBackupLimits();
+                        dataBackups.Items.Refresh();
+                        this.IsBackupCurrent = this.IsBackupCurrent;
+                        logMessage($"Backup of {backup.Type.ToLower()} {backup.Name} completed!", LogType.Success);
                     }
-                    logMessage($"Backup of {backup.Type.ToLower()} {backup.Name} completed!", LogType.Success);
+                    else
+                    {
+                        logMessage($"Backup of {save.Type.ToLower()} {save.Name} failed!", LogType.Error);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    logMessage($"Backup of {save.Type.ToLower()} {save.Name} failed!", LogType.Error);
+                    logMessage($"Error attempting backup of {savepath}: {ex.Message}");
                 }
             }
         }
@@ -483,20 +469,12 @@ namespace ValheimSaveShield
         private Boolean isValheimRunning()
         {
             Process[] pname = Process.GetProcessesByName("valheim");
-            if (pname.Length == 0)
-            {
-                return false;
-            }
-            return true;
+            return pname.Length > 0;
         }
         private Boolean isValheimServerRunning()
         {
             Process[] pname = Process.GetProcessesByName("valheim_server");
-            if (pname.Length == 0)
-            {
-                return false;
-            }
-            return true;
+            return pname.Length > 0;
         }
 
         private void BtnRestore_Click(object sender, RoutedEventArgs e)
@@ -559,32 +537,27 @@ namespace ValheimSaveShield
             {
                 try
                 {
+                    if (e.FullPath.EndsWith(".old")) return;
                     if (Properties.Settings.Default.AutoBackup)
                     {
                         SaveFile save = new SaveFile(e.FullPath);
-                        if (save.Type.Equals("World"))
+                        if (!saveTimers.ContainsKey(e.FullPath))
                         {
-                            if (save.NeedsBackedUp)
-                            {
-                                doBackup(e.FullPath);
-                            }
-                            else
-                            {
-                                this.BackupIsCurrent = false;
-                                dataBackups.Items.Refresh();
-                                TimeSpan span = (save.BackupDueTime - DateTime.Now);
-                                logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
-                            }
-                        } else
-                        {
-                            //When character saves are modified, they are modified
-                            //two times in relatively rapid succession.
-                            //This timer is refreshed each time the save is modified,
-                            //and a backup only occurs after the timer expires.
-                            charSaveForBackup = save;
-                            saveTimer.Interval = 3000;
+                            var saveTimer = new SaveTimer(save);
+                            saveTimer.Interval = 1000;
+                            saveTimer.AutoReset = false;
+                            saveTimer.Elapsed += OnSaveTimerElapsed;
                             saveTimer.Enabled = true;
+                            saveTimers.Add(e.FullPath, saveTimer);
                         }
+                        else
+                        {
+                            saveTimers[e.FullPath].Interval = 1000;
+                        }
+                    }
+                    else
+                    {
+                        
                     }
                 }
                 catch (Exception ex)
@@ -594,24 +567,28 @@ namespace ValheimSaveShield
             });
         }
 
-        private void OnSaveTimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
+        private void OnSaveTimerElapsed(Object source, ElapsedEventArgs e)
         {
             this.Dispatcher.Invoke(() =>
             {
                 try
                 {
-                    if (charSaveForBackup.NeedsBackedUp)
+                    var timer = (SaveTimer)source;
+                    if (timer.Save.NeedsBackedUp)
+                    //if (charSaveForBackup != null && charSaveForBackup.NeedsBackedUp)
                     {
-                        doBackup(charSaveForBackup.FullPath);
-                        charSaveForBackup = null;
+                        doBackup(timer.Save.FullPath);
                     }
                     else
                     {
-                        this.BackupIsCurrent = false;
+                        this.IsBackupCurrent = false;
                         dataBackups.Items.Refresh();
-                        TimeSpan span = (charSaveForBackup.BackupDueTime - DateTime.Now);
-                        logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes, left until next backup");
+                        TimeSpan span = (timer.Save.BackupDueTime - DateTime.Now);
+                        logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes left until next backup is due.");
                     }
+                    //var timer = saveTimers[e.Save.FullPath];
+                    saveTimers.Remove(timer.Save.FullPath);
+                    timer.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -928,14 +905,14 @@ namespace ValheimSaveShield
         private void deleteMenuItem_Click(object sender, System.EventArgs e)
         {
             SaveBackup save = (SaveBackup)dataBackups.SelectedItem;
-            var confirmResult = MessageBox.Show($"Are you sure to delete backup \"{save.Label}\" ({save.SaveDate.ToString()})?",
-                                     "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+            ModernMessageBox mmbConfirm = new ModernMessageBox(this);
+            var confirmResult = mmbConfirm.Show($"Are you sure to delete backup \"{save.Label}\" ({save.SaveDate.ToString()})?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
             if (confirmResult == MessageBoxResult.Yes)
             {
                 if (save.Keep)
                 {
-                    confirmResult = MessageBox.Show($"This backup is marked for keeping. Are you SURE to delete backup \"{save.Label}\" ({save.SaveDate.ToString()})?",
-                                     "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+                    mmbConfirm = new ModernMessageBox(this);
+                    confirmResult = mmbConfirm.Show($"This backup is marked for keeping. Are you SURE to delete backup \"{save.Label}\" ({save.SaveDate.ToString()})?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
                     if (confirmResult != MessageBoxResult.Yes)
                     {
                         return;
@@ -943,7 +920,7 @@ namespace ValheimSaveShield
                 }
                 if (save.Active)
                 {
-                    this.BackupIsCurrent = false;
+                    this.IsBackupCurrent = false;
                 }
                 if (Directory.Exists(save.Folder))
                 {
@@ -976,8 +953,8 @@ namespace ValheimSaveShield
                         //do stuff in here with the interface
                         if (localVersion.CompareTo(remoteVersion) == -1)
                         {
-                            var confirmResult = MessageBox.Show("There is a new version available. Would you like to open the download page?",
-                                     "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                            ModernMessageBox mmbConfirm = new ModernMessageBox(this);
+                            var confirmResult = mmbConfirm.Show("There is a new version available. Would you like to open the download page?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                             if (confirmResult == MessageBoxResult.Yes)
                             {
                                 Process.Start("https://github.com/Razzmatazzz/ValheimSaveShield/releases/latest");
@@ -1027,8 +1004,8 @@ namespace ValheimSaveShield
                 string folderName = openFolderDialog.SelectedPath;
                 if (folderName.Equals(saveDirPath))
                 {
-                    MessageBox.Show("Please select a folder other than the game's save folder.",
-                                     "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+                    ModernMessageBox mmbConfirm = new ModernMessageBox(this);
+                    mmbConfirm.Show("Please select a folder other than the game's save folder.", "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
                 }
                 if (folderName.Equals(backupDirPath))
@@ -1037,8 +1014,8 @@ namespace ValheimSaveShield
                 }
                 if (listBackups.Count > 0)
                 {
-                    var confirmResult = MessageBox.Show("Do you want to move your backups to this new folder?",
-                                     "Move Backups", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                    ModernMessageBox mmbConfirm = new ModernMessageBox(this);
+                    var confirmResult = mmbConfirm.Show("Do you want to move your backups to this new folder?", "Move Backups", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                     if (confirmResult == MessageBoxResult.Yes)
                     {
                         CopyFolder(new DirectoryInfo(backupDirPath), new DirectoryInfo(folderName));
@@ -1157,7 +1134,8 @@ namespace ValheimSaveShield
                 string folderName = openFolderDialog.SelectedPath;
                 if (folderName.Equals(backupDirPath))
                 {
-                    MessageBox.Show("Please select a folder other than the backup folder.",
+                    ModernMessageBox mmbWarn = new ModernMessageBox(this);
+                    mmbWarn.Show("Please select a folder other than the backup folder.",
                                      "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
                 }
@@ -1167,7 +1145,8 @@ namespace ValheimSaveShield
                 }
                 if (!Directory.Exists($@"{folderName}\worlds"))
                 {
-                    MessageBox.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder.",
+                    ModernMessageBox mmbWarn = new ModernMessageBox(this);
+                    mmbWarn.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder.",
                                      "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
                     return;
                 }
@@ -1188,14 +1167,24 @@ namespace ValheimSaveShield
 
         private void btnFtpImport_Click(object sender, RoutedEventArgs e)
         {
-            // Only do something if user clicks OK
-            if (GetFtpSettings())
+            FtpSettingsWindow ftpWin = new FtpSettingsWindow();
+            ftpWin.Owner = this;
+            if ((bool)ftpWin.ShowDialog())
             {
+                txtFtpImport.Text = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
                 if (ftpDirectorySync == null)
                 {
                     syncDirectoriesAsync();
                 }
             }
+            // Only do something if user clicks OK
+            /*if (GetFtpSettings())
+            {
+                if (ftpDirectorySync == null)
+                {
+                    syncDirectoriesAsync();
+                }
+            }*/
         }
 
         private void syncDirectoriesAsync()
@@ -1267,78 +1256,6 @@ namespace ValheimSaveShield
                 logMessage($"Error starting FTP sync thread: {ex.Message}");
             }
         }
-
-        private bool GetFtpSettings()
-        {
-            System.Windows.Forms.Form prompt = new System.Windows.Forms.Form()
-            {
-                Width = 500,
-                Height = 500,
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
-                Text = "FTP Import",
-                StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-            };
-            System.Windows.Forms.Label ipLabel = new System.Windows.Forms.Label() { Left = 50, Top = 20, Text = "Server IP" };
-            System.Windows.Forms.TextBox ipBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 50, Width = 400 };
-            System.Windows.Forms.Label portLabel = new System.Windows.Forms.Label() { Left = 50, Top = 100, Text = "Port" };
-            System.Windows.Forms.TextBox portBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 130, Width = 400 };
-            System.Windows.Forms.Label filePathLabel = new System.Windows.Forms.Label() { Left = 50, Top = 180, Text = "Worlds Path" };
-            System.Windows.Forms.TextBox filePathBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 210, Width = 400 };
-            System.Windows.Forms.Label usernameLabel = new System.Windows.Forms.Label() { Left = 50, Top = 260, Text = "Username" };
-            System.Windows.Forms.TextBox usernameBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 290, Width = 400 };
-            System.Windows.Forms.Label passwordLabel = new System.Windows.Forms.Label() { Left = 50, Top = 340, Text = "Password" };
-            System.Windows.Forms.TextBox passwordBox = new System.Windows.Forms.TextBox() { Left = 50, Top = 370, Width = 400 };
-
-            System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button() { Text = "Import Worlds", Left = 350, Width = 100, Top = 400, DialogResult = System.Windows.Forms.DialogResult.OK };
-            confirmation.Click += (sender, e) => { prompt.Close(); };
-
-            // load defaults
-            ipBox.Text = Properties.Settings.Default.FtpIpAddress;
-            portBox.Text = Properties.Settings.Default.FtpPort;
-            filePathBox.Text = Properties.Settings.Default.FtpFilePath;
-            usernameBox.Text = Properties.Settings.Default.FtpUsername;
-            passwordBox.Text = Properties.Settings.Default.FtpPassword;
-
-            prompt.Controls.Add(ipLabel);
-            prompt.Controls.Add(ipBox);
-            prompt.Controls.Add(portLabel);
-            prompt.Controls.Add(portBox);
-            prompt.Controls.Add(filePathLabel);
-            prompt.Controls.Add(filePathBox);
-            prompt.Controls.Add(usernameLabel);
-            prompt.Controls.Add(usernameBox);
-            prompt.Controls.Add(passwordLabel);
-            prompt.Controls.Add(passwordBox);
-
-            prompt.Controls.Add(confirmation);
-            prompt.AcceptButton = confirmation;
-
-            System.Windows.Forms.DialogResult dialog = prompt.ShowDialog();
-
-            if (dialog == System.Windows.Forms.DialogResult.OK)
-            {
-                if (filePathBox.Text.StartsWith("/"))
-                {
-                    filePathBox.Text = filePathBox.Text.Remove(0, 1);
-                }
-
-                if (filePathBox.Text.EndsWith("/"))
-                {
-                    filePathBox.Text = filePathBox.Text.Remove(filePathBox.Text.Length - 1, 1);
-                }
-
-                Properties.Settings.Default.FtpIpAddress = ipBox.Text;
-                Properties.Settings.Default.FtpPort = portBox.Text;
-                Properties.Settings.Default.FtpFilePath = filePathBox.Text;
-                Properties.Settings.Default.FtpUsername = usernameBox.Text;
-                Properties.Settings.Default.FtpPassword = passwordBox.Text;
-                Properties.Settings.Default.Save();
-
-                txtFtpImport.Text = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
-            }
-            return dialog == System.Windows.Forms.DialogResult.OK;
-        }
-
         private void Window_StateChanged(object sender, EventArgs e)
         {
             if (WindowState == WindowState.Minimized)

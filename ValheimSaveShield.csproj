@@ -109,9 +109,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FtpSettingsWindow.xaml.cs">
+      <DependentUpon>FtpSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ModernMessageBox.xaml.cs">
+      <DependentUpon>ModernMessageBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SaveBackup.cs" />
     <Compile Include="SaveFile.cs" />
+    <Compile Include="SaveTimer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="SynchronizeDirectories.cs" />
+    <Page Include="FtpSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -124,6 +137,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ModernMessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

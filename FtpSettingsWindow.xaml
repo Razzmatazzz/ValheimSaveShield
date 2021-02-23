@@ -1,0 +1,48 @@
+﻿<Window x:Class="ValheimSaveShield.FtpSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ValheimSaveShield"
+        mc:Ignorable="d"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="FTP Import" Height="Auto" SizeToContent="Height" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Server IP" Margin="5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+        <Label Content="Port" Margin="5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"/>
+        <TextBox x:Name="txtIP" Margin="5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
+        <TextBox x:Name="txtPort" Margin="5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"/>
+        <Label Content="Worlds Path" Margin="5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="txtWorldsPath" Margin="5" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <Label Content="Username" Margin="5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0"/>
+        <Label Content="Password" Margin="5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"/>
+        <TextBox x:Name="txtUsername" Margin="5" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0"/>
+        <TextBox x:Name="txtPassword" Margin="5" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1"/>
+        <Grid Grid.Row="6" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnSave" Content="Save" HorizontalAlignment="Center" Margin="5" Grid.Column="1" Click="btnSave_Click"/>
+            <Button x:Name="btnTest" Content="Test" HorizontalAlignment="Center" Margin="5" Grid.Column="2" Click="btnTest_Click"/>
+            <Button x:Name="btnCancel" Content="Cancel" HorizontalAlignment="Center" Margin="5" Grid.Column="3" Click="btnCancel_Click"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace ValheimSaveShield
 {
     class SaveFile
     {
         private string filePath;
-        private DateTime backupDueTime;
 
         public SaveFile(string path)
         {
@@ -109,38 +109,32 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (backupDueTime == null)
+                string[] backups = Directory.GetDirectories(this.BackupsPath);
+                SaveBackup latestBackup = null;
+                foreach (string bdir in backups)
                 {
-                    string[] backups = Directory.GetDirectories(this.BackupsPath);
-                    SaveBackup latestBackup = null;
-                    foreach (string bdir in backups)
+                    SaveBackup backup = new SaveBackup(bdir + "\\" + this.FileName);
+                    if (latestBackup == null || backup.SaveDate.Ticks > latestBackup.SaveDate.Ticks)
                     {
-                        SaveBackup backup = new SaveBackup(bdir + "\\" + this.FileName);
-                        if (latestBackup == null || backup.SaveDate.Ticks > latestBackup.SaveDate.Ticks)
-                        {
-                            latestBackup = backup;
-                        }
+                        latestBackup = backup;
                     }
-                    DateTime latestBackupTime;
-                    if (latestBackup == null)
-                    {
-                        latestBackupTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    }
-                    else
-                    {
-                        latestBackupTime = latestBackup.SaveDate;
-                    }
-                    this.backupDueTime = latestBackupTime.AddMinutes(Properties.Settings.Default.BackupMinutes);
                 }
-                return backupDueTime;
+                DateTime latestBackupTime = new DateTime();
+                if (latestBackup != null)
+                {
+                    latestBackupTime = latestBackup.SaveDate;
+                }
+                //Debug.WriteLine($"Latest backup for {this.FullPath} is {latestBackup.SaveDate}");
+                return latestBackupTime.AddMinutes(Properties.Settings.Default.BackupMinutes);
             }
         }
 
         public SaveBackup PerformBackup()
         {
+            int copyAttempts = 0;
             try
             {
-                string backupFolder = Properties.Settings.Default.BackupFolder + "\\" + this.Type.ToLower() + "s\\" + this.Name + "\\" + File.GetLastWriteTime(this.FullPath).Ticks;
+                string backupFolder = $@"{Properties.Settings.Default.BackupFolder}\{this.Type.ToLower()}s\{this.Name}\{File.GetLastWriteTime(this.FullPath).Ticks}";
                 if (!Directory.Exists(backupFolder))
                 {
                     Directory.CreateDirectory(backupFolder);
@@ -159,10 +153,22 @@ namespace ValheimSaveShield
             {
                 if (ex.Message.Contains("being used by another process"))
                 {
-                    //logMessage("Save file in use; waiting 0.5 seconds and retrying.");
-                    System.Threading.Thread.Sleep(500);
-                    return this.PerformBackup();
+                    copyAttempts++;
+                    if (copyAttempts < 5)
+                    {
+                        //logMessage("Save file in use; waiting 0.5 seconds and retrying.");
+                        System.Threading.Thread.Sleep(500*copyAttempts);
+                        return this.PerformBackup();
+                    }
+                    else
+                    {
+                        throw new Exception("Save file in use; multiple attempts to copy failed.");
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             return null;
         }
