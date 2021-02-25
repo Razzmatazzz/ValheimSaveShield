@@ -1314,5 +1314,10 @@ namespace ValheimSaveShield
             }
             Process.Start(backupDirPath + "\\");
         }
+
+        private void btnReportBug_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/Razzmatazzz/ValheimSaveShield/issues");
+        }
     }
 }

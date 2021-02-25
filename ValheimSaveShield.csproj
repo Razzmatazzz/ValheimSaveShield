@@ -172,6 +172,7 @@
   <ItemGroup>
     <None Include="images\main_interface.png" />
     <None Include="images\settings.png" />
+    <Resource Include="Resources\Bug_32x.png" />
     <Content Include="Resources\vss.ico" />
     <Resource Include="Resources\vss_32.png" />
     <Resource Include="SaveAll_32x.ico" />

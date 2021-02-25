@@ -26,12 +26,19 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
                 <DynamicResource ResourceKey="Save"/>
             </Button>
             <Button x:Name="btnRestore" HorizontalAlignment="Left" VerticalAlignment="Top" IsEnabled="False" Click="BtnRestore_Click" ToolTip="Restore selected save backup" Margin="5" TabIndex="2" Grid.Column="1">
                 <DynamicResource ResourceKey="RestoreGrey"/>
+            </Button>
+            <Button x:Name="btnReportBug" Margin="5" Grid.Column="3" ToolTip="Report a bug" Click="btnReportBug_Click">
+                <Button.Content>
+                    <Image Source="Resources\Bug_32x.png"/>
+                </Button.Content>
             </Button>
         </Grid>
         <TabControl Grid.Row="1" TabIndex="5">
