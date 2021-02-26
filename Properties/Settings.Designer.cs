@@ -49,10 +49,10 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string WorldBackupKeep {
+        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
+        public global::System.Collections.Specialized.StringDictionary WorldBackupKeep {
             get {
-                return ((string)(this["WorldBackupKeep"]));
+                return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupKeep"]));
             }
             set {
                 this["WorldBackupKeep"] = value;
@@ -61,10 +61,10 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string WorldBackupLabel {
+        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
+        public global::System.Collections.Specialized.StringDictionary WorldBackupLabel {
             get {
-                return ((string)(this["WorldBackupLabel"]));
+                return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupLabel"]));
             }
             set {
                 this["WorldBackupLabel"] = value;
@@ -145,10 +145,10 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CharBackupLabel {
+        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
+        public global::System.Collections.Specialized.StringDictionary CharBackupLabel {
             get {
-                return ((string)(this["CharBackupLabel"]));
+                return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupLabel"]));
             }
             set {
                 this["CharBackupLabel"] = value;
@@ -157,10 +157,10 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CharBackupKeep {
+        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
+        public global::System.Collections.Specialized.StringDictionary CharBackupKeep {
             get {
-                return ((string)(this["CharBackupKeep"]));
+                return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupKeep"]));
             }
             set {
                 this["CharBackupKeep"] = value;
@@ -236,6 +236,41 @@ namespace ValheimSaveShield.Properties {
             }
             set {
                 this["ShowMinimizeMessage"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection SaveFolders {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["SaveFolders"]));
+            }
+            set {
+                this["SaveFolders"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FtpSaveDest {
+            get {
+                return ((string)(this["FtpSaveDest"]));
+            }
+            set {
+                this["FtpSaveDest"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Setting {
+            get {
+                return ((string)(this["Setting"]));
+            }
+            set {
+                this["Setting"] = value;
             }
         }
     }

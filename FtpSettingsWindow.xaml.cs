@@ -30,6 +30,18 @@ namespace ValheimSaveShield
             txtWorldsPath.Text = Properties.Settings.Default.FtpFilePath;
             txtUsername.Text = Properties.Settings.Default.FtpUsername;
             txtPassword.Text = Properties.Settings.Default.FtpPassword;
+            foreach (var path in Properties.Settings.Default.SaveFolders)
+            {
+                lstSaveFolder.Items.Add(path);
+            }
+            if (Properties.Settings.Default.FtpSaveDest.Length > 0)
+            {
+                lstSaveFolder.SelectedItem = Properties.Settings.Default.FtpSaveDest;
+            }
+            else
+            {
+                lstSaveFolder.SelectedIndex = 0;
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -49,6 +61,7 @@ namespace ValheimSaveShield
             Properties.Settings.Default.FtpFilePath = txtWorldsPath.Text;
             Properties.Settings.Default.FtpUsername = txtUsername.Text;
             Properties.Settings.Default.FtpPassword = txtPassword.Text;
+            Properties.Settings.Default.FtpSaveDest = lstSaveFolder.SelectedItem.ToString();
             Properties.Settings.Default.Save();
 
             DialogResult = true;

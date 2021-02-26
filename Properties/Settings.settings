@@ -8,10 +8,10 @@
     <Setting Name="BackupMinutes" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="WorldBackupKeep" Type="System.String" Scope="User">
+    <Setting Name="WorldBackupKeep" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WorldBackupLabel" Type="System.String" Scope="User">
+    <Setting Name="WorldBackupLabel" Roaming="true" GenerateDefaultValueInCode="false" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="BackupFolder" Type="System.String" Scope="User">
@@ -32,10 +32,10 @@
     <Setting Name="BackupLimit" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="CharBackupLabel" Type="System.String" Scope="User">
+    <Setting Name="CharBackupLabel" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CharBackupKeep" Type="System.String" Scope="User">
+    <Setting Name="CharBackupKeep" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="FtpIpAddress" Type="System.String" Scope="User">
@@ -55,6 +55,15 @@
     </Setting>
     <Setting Name="ShowMinimizeMessage" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="SaveFolders" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="FtpSaveDest" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Setting" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

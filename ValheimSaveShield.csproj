@@ -120,6 +120,7 @@
     <Compile Include="SaveTimer.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="SaveWatcher.cs" />
     <Compile Include="SynchronizeDirectories.cs" />
     <Page Include="FtpSettingsWindow.xaml">
       <SubType>Designer</SubType>
@@ -173,6 +174,11 @@
     <None Include="images\main_interface.png" />
     <None Include="images\settings.png" />
     <Resource Include="Resources\Bug_32x.png" />
+    <Resource Include="Resources\Add_32x.png" />
+    <Resource Include="Resources\Remove_32x.png" />
+    <Resource Include="Resources\Remove_grey_32x.png" />
+    <Resource Include="Resources\Edit_32x.png" />
+    <Resource Include="Resources\Edit_grey_32x.png" />
     <Content Include="Resources\vss.ico" />
     <Resource Include="Resources\vss_32.png" />
     <Resource Include="SaveAll_32x.ico" />

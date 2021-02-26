@@ -21,7 +21,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (this.filePath.StartsWith(Properties.Settings.Default.SaveFolder + "\\worlds\\"))
+                if (new FileInfo(this.filePath).Directory.FullName.EndsWith("\\worlds"))
                 {
                     return "World";
                 }

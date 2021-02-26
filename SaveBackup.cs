@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
+using System.Diagnostics;
 
 namespace ValheimSaveShield
 {
@@ -59,7 +60,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (this.saveData.savePath.StartsWith(Properties.Settings.Default.BackupFolder + "\\worlds\\"))
+                if (new FileInfo(this.saveData.savePath).Directory.FullName.StartsWith($@"{Properties.Settings.Default.BackupFolder}\worlds\"))
                 {
                     return "World";
                 }
@@ -108,10 +109,13 @@ namespace ValheimSaveShield
         {
             get
             {
-                string activePath = this.ActivePath;
-                if (File.Exists(activePath) && File.GetLastWriteTime(activePath).Ticks == this.SaveDateTime.Ticks)
+                //string activePath = this.ActivePath;
+                foreach (var activePath in ActivePaths)
                 {
-                    return true;
+                    if (File.Exists(activePath) && File.GetLastWriteTime(activePath).Ticks == this.SaveDateTime.Ticks)
+                    {
+                        return true;
+                    }
                 }
                 return false;
             }/*
@@ -146,11 +150,16 @@ namespace ValheimSaveShield
             }
         }
 
-        public string ActivePath
+        public List<string> ActivePaths
         {
             get
             {
-                return Properties.Settings.Default.SaveFolder + "\\" + this.Type.ToLower() + "s\\" + this.FileName;
+                var paths = new List<string>();
+                foreach (var savePath in Properties.Settings.Default.SaveFolders)
+                {
+                    paths.Add($@"{savePath}\{this.Type.ToLower()}s\{this.FileName}");
+                }
+                return paths;
             }
         }
 
@@ -183,11 +192,16 @@ namespace ValheimSaveShield
 
         public void Restore()
         {
-            File.Copy(this.FullPath, this.ActivePath, true);
+            Restore(this.ActivePaths.First());
+        }
+
+        public void Restore(string path)
+        {
+            File.Copy(this.FullPath, path, true);
             if (this.Type == "World")
             {
                 FileInfo info = new FileInfo(this.FullPath);
-                FileInfo destInfo = new FileInfo(this.ActivePath);
+                FileInfo destInfo = new FileInfo(path);
                 string sourcefwl = info.DirectoryName + "\\" + this.Name + ".fwl";
                 string destfwl = destInfo.DirectoryName + "\\" + this.Name + ".fwl";
                 File.Copy(sourcefwl, destfwl, true);
