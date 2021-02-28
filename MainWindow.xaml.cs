@@ -172,6 +172,14 @@ namespace ValheimSaveShield
                     saveWatchers.Add(watcher);
                 }
                 lstSaveFolders.Items.Refresh();
+                if (lstSaveFolders.Items.Count > 1)
+                {
+                    lblSaveFolders.Content = "Save Folders";
+                }
+                else
+                {
+                    lblSaveFolders.Content = "Save Folder";
+                }
             }
             else if (Properties.Settings.Default.SaveFolder.Length != 0 && Directory.Exists(Properties.Settings.Default.SaveFolder))
             {
@@ -197,7 +205,6 @@ namespace ValheimSaveShield
             saveTimers = new Dictionary<string, SaveTimer>();
 
             listBackups = new List<SaveBackup>();
-
             notifyIcon = new System.Windows.Forms.NotifyIcon();
             notifyIcon.BalloonTipText = "VSS has been minimized. Click the tray icon to restore.";
             notifyIcon.BalloonTipClicked += NotifyIcon_Click;
@@ -321,7 +328,8 @@ namespace ValheimSaveShield
                         listBackups.Add(backup);
                     }
                 }
-                listBackups.Sort();
+                //listBackups.Sort();
+                listBackups = listBackups.OrderByDescending(x => x.SaveDate).ToList();
                 dataBackups.ItemsSource = listBackups;
                 if (listBackups.Count > 0)
                 {
@@ -383,7 +391,14 @@ namespace ValheimSaveShield
                 run.Foreground = new SolidColorBrush(color);
                 Paragraph paragraph = new Paragraph(run);
                 paragraph.Margin = new Thickness(0);
-                txtLog.Document.Blocks.Add(paragraph);
+                if (txtLog.Document.Blocks.Count > 0)
+                {
+                    txtLog.Document.Blocks.InsertBefore(txtLog.Document.Blocks.FirstBlock, paragraph);
+                }
+                else
+                {
+                    txtLog.Document.Blocks.Add(paragraph);
+                }
                 if (msg.Contains("\n"))
                 {
                     lblLastMessage.Content = msg.Split('\n')[0];
@@ -444,6 +459,8 @@ namespace ValheimSaveShield
                     {
                         listBackups.Add(backup);
                         checkBackupLimits();
+                        listBackups = listBackups.OrderByDescending(x => x.SaveDate).ToList();
+                        dataBackups.ItemsSource = listBackups;
                         dataBackups.Items.Refresh();
                         this.IsBackupCurrent = this.IsBackupCurrent;
                         logMessage($"Backup of {backup.Type.ToLower()} {backup.Name} completed!", LogType.Success);
@@ -1283,6 +1300,7 @@ namespace ValheimSaveShield
                     Directory.CreateDirectory($@"{folderName}\characters");
                 }
                 lstSaveFolders.Items.Add(folderName);
+                lblSaveFolders.Content = "Save Folders";
                 var watcher = new SaveWatcher(folderName);
                 watcher.LogMessage += SaveWatcher_LogMessage;
                 watcher.WorldWatcher.Changed += OnSaveFileChanged;
@@ -1386,6 +1404,14 @@ namespace ValheimSaveShield
                 Properties.Settings.Default.FtpSaveDest = Properties.Settings.Default.SaveFolders[0];
                 logMessage($"Local FTP destination folder changed to {Properties.Settings.Default.SaveFolders[0]}.");
             }
+            if (lstSaveFolders.Items.Count > 1)
+            {
+                lblSaveFolders.Content = "Save Folders";
+            }
+            else
+            {
+                lblSaveFolders.Content = "Save Folder";
+            }
             Properties.Settings.Default.Save();
         }
 
@@ -1448,6 +1474,14 @@ namespace ValheimSaveShield
                     menuBackupsRestore.Icon = FindResource("RestoreGrey");
                 }
             }
+            if (selectedBackup.Type == "World")
+            {
+                menuBackupsViewMap.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                menuBackupsViewMap.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void menuBackupsRestore_Click(object sender, RoutedEventArgs e)
@@ -1477,6 +1511,48 @@ namespace ValheimSaveShield
         {
             InvalidateMeasure();
             InvalidateVisual();
+        }
+
+        private void menuBackupsViewMap_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var selectedBackup = (SaveBackup)dataBackups.SelectedItem;
+                var fwl = File.ReadAllText($@"{selectedBackup.Folder}\{selectedBackup.Name}.fwl");
+                var lines = fwl.Split('\n');
+                var seed = lines[lines.Length - 1].Substring(0, 10);
+                Process.Start($"http://valheim-map.world/?seed={seed}&offset=0%2C0&zoom=0.600");
+
+                //Get boss coordinates. Not currently very useful.
+                /*var bosses = new List<string>();
+                bosses.Add("Eikthyrnir");
+                bosses.Add("GDKing");
+                bosses.Add("Bonemass");
+                bosses.Add("Dragonqueen");
+                bosses.Add("GoblinKing");
+                bosses.Add("Vendor_BlackForest");
+                byte[] byteBuffer = File.ReadAllBytes(selectedBackup.FullPath);
+                string byteBufferAsString = System.Text.Encoding.Default.GetString(byteBuffer);
+                foreach (var keyval in bosses)
+                {
+                    Debug.WriteLine(keyval);
+                    for (var offset = byteBufferAsString.IndexOf(keyval); offset != -1; offset = byteBufferAsString.IndexOf(keyval, offset))
+                    {
+                        var xstring = byteBufferAsString.Substring(offset + keyval.Length, 4);
+                        var xfloat = System.BitConverter.ToSingle(System.Text.Encoding.Default.GetBytes(xstring), 0);
+                        var xint = (int)Math.Round(xfloat);
+                        var ystring = byteBufferAsString.Substring(offset + keyval.Length + 8, 4);
+                        var yfloat = System.BitConverter.ToSingle(System.Text.Encoding.Default.GetBytes(ystring), 0);
+                        var yint = (int)Math.Round(yfloat);
+                        Debug.WriteLine($"{xint}, {yint}");
+                        offset += keyval.Length + 12;
+                    }
+                }*/
+            }
+            catch (Exception ex)
+            {
+                logMessage($"Error showing map: {ex.Message}", LogType.Error);
+            }
         }
     }
 

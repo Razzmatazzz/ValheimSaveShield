@@ -22,26 +22,21 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition x:Name="ForToolbar"  Height="45" />
+            <!--<RowDefinition x:Name="ForToolbar"  Height="45" />-->
             <RowDefinition x:Name="ForBackups"  Height="*" />
             <RowDefinition x:Name="ForStatusbar" Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+        <!--<Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
+            <<Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
                 <DynamicResource ResourceKey="Save"/>
             </Button>
-            <Button x:Name="btnReportBug" Margin="5" Grid.Column="3" ToolTip="Report a bug" Click="btnReportBug_Click">
-                <Button.Content>
-                    <Image Source="Resources\Bug_32x.png"/>
-                </Button.Content>
-            </Button>
-        </Grid>
-        <TabControl Grid.Row="1" TabIndex="5">
+        </Grid>-->
+        <TabControl Grid.Row="0" TabIndex="5">
             <TabItem x:Name="tabBackups" Header="Backups">
                 <DataGrid x:Name="dataBackups" BeginningEdit="DataBackups_BeginningEdit" SelectionMode="Single" CanUserDeleteRows="False" CellEditEnding="DataBackups_CellEditEnding" AutoGeneratingColumn="DataBackups_AutoGeneratingColumn">
                     <DataGrid.ContextMenu>
@@ -49,6 +44,11 @@
                             <MenuItem x:Name="menuBackupsRestore" Header="Restore" Click="menuBackupsRestore_Click">
                                 <MenuItem.Icon>
                                     <DynamicResource ResourceKey="Restore"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem x:Name="menuBackupsViewMap" Header="View Map" Click="menuBackupsViewMap_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="Resources/MapTileLayer_32x.png"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                             <MenuItem x:Name="menuBackupsDelete" Header="Delete" Click="menuBackupsDelete_Click">
@@ -76,13 +76,13 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox x:Name="chkAutoBackup" Content="Automatically backup save files" ToolTip="Monitor save files and back them up when they're changed" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Top" Click="ChkAutoBackup_Click" Grid.Row="0" Grid.ColumnSpan="2" TabIndex="101" Checked="ChkAutoBackup_Click" Unchecked="ChkAutoBackup_Click"/>
-                    <TextBox x:Name="txtBackupMins" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2" Width="64" LostFocus="TxtBackupMins_LostFocus" KeyUp="TxtBackupMins_KeyUp" TabIndex="102"/>
+                    <CheckBox x:Name="chkAutoBackup" Content="Automatically backup save files" ToolTip="Monitor save files and back them up when they're changed" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Top" Click="ChkAutoBackup_Click" Grid.Row="0" Grid.ColumnSpan="2" Checked="ChkAutoBackup_Click" Unchecked="ChkAutoBackup_Click"/>
+                    <TextBox x:Name="txtBackupMins" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2" Width="64" LostFocus="TxtBackupMins_LostFocus" KeyUp="TxtBackupMins_KeyUp"/>
                     <Label Content="Minutes between backups" ToolTip="Minimum amount of time that must have passed since last backup before a new backup is made" HorizontalAlignment="Left" Margin="90,2,0,2" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="2"/>
-                    <TextBox x:Name="txtBackupLimit" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Width="64" Grid.Row="2" Grid.ColumnSpan="2" KeyUp="TxtBackupLimit_KeyUp" LostFocus="TxtBackupLimit_LostFocus" TabIndex="103"/>
+                    <TextBox x:Name="txtBackupLimit" HorizontalAlignment="Left" Margin="10,2,0,2" TextWrapping="Wrap" VerticalAlignment="Center" Width="64" Grid.Row="2" Grid.ColumnSpan="2" KeyUp="TxtBackupLimit_KeyUp" LostFocus="TxtBackupLimit_LostFocus"/>
                     <Label Content="Backups to keep (0 for unlimited)" ToolTip="When the number of backups for a world or character reaches this number, backups will automatically be deleted starting with the oldest" HorizontalAlignment="Left" Margin="90,2,0,2" VerticalAlignment="Center" Grid.Row="2" Grid.ColumnSpan="2" />
-                    <Label Content="Save Folders" ToolTip="Only change if you know what you're doing." HorizontalAlignment="Center" Margin="10" VerticalAlignment="Top" Grid.Row="3" Grid.Column="0" />
-                    <ListBox x:Name="lstSaveFolders" Margin="0,2,10,2" VerticalAlignment="Center" TabIndex="6" Height="Auto" IsTabStop="True" ToolTip="Where your Valheim saves are located. Right-click for more options." Grid.Row="3" Grid.Column="1" ContextMenuOpening="lstSaveFolders_ContextMenuOpening">
+                    <Label x:Name="lblSaveFolders" Content="Save Folder" ToolTip="Only change if you know what you're doing." HorizontalAlignment="Center" Margin="10" VerticalAlignment="Top" Grid.Row="3" Grid.Column="0" />
+                    <ListBox x:Name="lstSaveFolders" Margin="0,2,10,2" VerticalAlignment="Center" Height="Auto" ToolTip="Where your Valheim saves are located. Right-click for more options." Grid.Row="3" Grid.Column="1" ContextMenuOpening="lstSaveFolders_ContextMenuOpening">
                         <ListBox.ContextMenu>
                             <ContextMenu x:Name="menuSaveFolders">
                                 <MenuItem x:Name="menuSavePathOpen2" Header="Open in Windows Explorer" Click="menuSavePathOpen_Click">
@@ -90,18 +90,18 @@
                                         <Image Source="Resources/OpenFolder_32x.png"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem x:Name="menuSavePathAdd" Header="Add save path" Click="menuSavePathAdd_Click">
+                                <MenuItem x:Name="menuSavePathAdd" Header="Add save folder" Click="menuSavePathAdd_Click">
                                     <MenuItem.Icon>
                                         <Image Source="Resources/Add_32x.png"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
-                                <MenuItem x:Name="menuSavePathEdit" Header="Edit save path" Click="menuSavePathEdit_Click">
+                                <MenuItem x:Name="menuSavePathEdit" Header="Edit save folder" Click="menuSavePathEdit_Click">
                                     <MenuItem.Icon>
                                         <DynamicResource ResourceKey="EditGrey"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem x:Name="menuSavePathRemove" Header="Remove save path" Click="menuSavePathRemove_Click">
+                                <MenuItem x:Name="menuSavePathRemove" Header="Remove save folder" Click="menuSavePathRemove_Click">
                                     <MenuItem.Icon>
                                         <DynamicResource ResourceKey="RemoveGrey"/>
                                     </MenuItem.Icon>
@@ -109,7 +109,7 @@
                             </ContextMenu>
                         </ListBox.ContextMenu>
                     </ListBox>
-                    <Button x:Name="btnBackupFolder" Content="Backup Folder" HorizontalAlignment="Left" Margin="10,2,10,2" VerticalAlignment="Center" Click="BtnBackupFolder_Click" TabIndex="104" Grid.Row="4" Grid.Column="0" />
+                    <Button x:Name="btnBackupFolder" Content="Backup Folder" HorizontalAlignment="Left" Margin="10,2,10,2" VerticalAlignment="Center" Click="BtnBackupFolder_Click" Grid.Row="4" Grid.Column="0" />
                     <TextBox x:Name="txtBackupFolder" ToolTip="Where your save backups are stored" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" IsReadOnly="True" TabIndex="-1" IsTabStop="False" Grid.Row="4" Grid.Column="1">
                         <TextBox.ContextMenu>
                             <ContextMenu>
@@ -122,10 +122,10 @@
                         </TextBox.ContextMenu>
                     </TextBox>
                     <Button x:Name="btnFtpImport" Content="FTP Import" HorizontalAlignment="Stretch" Margin="10,2,10,2" VerticalAlignment="Center" ToolTip="Only change if you know what you're doing!" Click="btnFtpImport_Click" Grid.Row="5" Grid.Column="0"/>
-                    <TextBox x:Name="txtFtpImport" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" TabIndex="6" IsTabStop="False" IsReadOnly="True" ToolTip="If you have a remote dedicated server with FTP access, you can back up that server's saves" Grid.Row="5" Grid.Column="1"/>
-                    <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" TabIndex="105" Grid.Row="6" Grid.ColumnSpan="2" Checked="chkCreateLogFile_Click" Unchecked="chkCreateLogFile_Click"/>
+                    <TextBox x:Name="txtFtpImport" Margin="0,2,10,2" TextWrapping="Wrap" VerticalAlignment="Center" IsTabStop="False" IsReadOnly="True" ToolTip="If you have a remote dedicated server with FTP access, you can back up that server's saves" Grid.Row="5" Grid.Column="1"/>
+                    <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Grid.Row="6" Grid.ColumnSpan="2" Checked="chkCreateLogFile_Click" Unchecked="chkCreateLogFile_Click"/>
                     <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,5,0,10" VerticalAlignment="Center" Grid.Row="7" Grid.ColumnSpan="2" Checked="chkAutoCheckUpdate_Click"/>
-                    <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="250,5,0,10" VerticalAlignment="Center" Click="btnAppUpdate_Click" TabIndex="106" Grid.Row="7" Grid.ColumnSpan="2" />
+                    <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="250,5,0,10" VerticalAlignment="Center" Click="btnAppUpdate_Click" Grid.Row="7" Grid.ColumnSpan="2" />
                 </Grid>
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
@@ -134,11 +134,23 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <StatusBar Grid.Row="2">
+        <StatusBar Grid.Row="1">
             <StatusBarItem HorizontalAlignment="Left">
                 <Label x:Name="lblStatus" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0" ToolTip="Not backed up" Height="26" VerticalContentAlignment="Center">
                     <DynamicResource ResourceKey="StatusNo"/>
                 </Label>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Left">
+                <Button x:Name="btnBackup" Click="BtnBackup_Click" ToolTip="Backup current save"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0" Height="26" VerticalContentAlignment="Center">
+                    <DynamicResource ResourceKey="Save"/>
+                </Button>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Left">
+                <Button x:Name="btnReportBug" Height="26" ToolTip="Report a bug" Click="btnReportBug_Click">
+                    <Button.Content>
+                        <Image Source="Resources\Bug_32x.png"/>
+                    </Button.Content>
+                </Button>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <Label x:Name="lblLastMessage" Content="" HorizontalAlignment="Left" VerticalContentAlignment="Center" Margin="5,0"/>

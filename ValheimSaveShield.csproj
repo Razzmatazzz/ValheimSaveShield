@@ -179,6 +179,7 @@
     <Resource Include="Resources\Remove_grey_32x.png" />
     <Resource Include="Resources\Edit_32x.png" />
     <Resource Include="Resources\Edit_grey_32x.png" />
+    <Resource Include="Resources\MapTileLayer_32x.png" />
     <Content Include="Resources\vss.ico" />
     <Resource Include="Resources\vss_32.png" />
     <Resource Include="SaveAll_32x.ico" />
