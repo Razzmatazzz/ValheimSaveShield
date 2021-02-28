@@ -972,10 +972,9 @@ namespace ValheimSaveShield
                     if (folderName.Equals(saveDirPath))
                     {
                         ModernMessageBox mmbConfirm = new ModernMessageBox(this);
-                        mmbConfirm.Show("Please select a folder other than the game's save folder.", "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
-
+                        mmbConfirm.Show("Please select a folder other than the game's save folder.", "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                        return;
                     }
-                    return;
                 }
                 if (folderName.Equals(backupDirPath))
                 {
