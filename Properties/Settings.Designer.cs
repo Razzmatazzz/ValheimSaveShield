@@ -49,7 +49,6 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
         public global::System.Collections.Specialized.StringDictionary WorldBackupKeep {
             get {
                 return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupKeep"]));
@@ -61,7 +60,6 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
         public global::System.Collections.Specialized.StringDictionary WorldBackupLabel {
             get {
                 return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupLabel"]));
@@ -121,18 +119,6 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string SaveFolder {
-            get {
-                return ((string)(this["SaveFolder"]));
-            }
-            set {
-                this["SaveFolder"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int BackupLimit {
             get {
@@ -145,7 +131,6 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
         public global::System.Collections.Specialized.StringDictionary CharBackupLabel {
             get {
                 return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupLabel"]));
@@ -157,7 +142,6 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SettingsSerializeAs(global::System.Configuration.SettingsSerializeAs.Binary)]
         public global::System.Collections.Specialized.StringDictionary CharBackupKeep {
             get {
                 return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupKeep"]));

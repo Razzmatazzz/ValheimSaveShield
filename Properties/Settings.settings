@@ -11,7 +11,7 @@
     <Setting Name="WorldBackupKeep" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WorldBackupLabel" Roaming="true" GenerateDefaultValueInCode="false" Type="System.Collections.Specialized.StringDictionary" Scope="User">
+    <Setting Name="WorldBackupLabel" GenerateDefaultValueInCode="false" Type="System.Collections.Specialized.StringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="BackupFolder" Type="System.String" Scope="User">
@@ -25,9 +25,6 @@
     </Setting>
     <Setting Name="AutoCheckUpdate" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="SaveFolder" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="BackupLimit" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>

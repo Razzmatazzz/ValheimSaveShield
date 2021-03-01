@@ -159,17 +159,13 @@ namespace ValheimSaveShield
             {
                 foreach (var path in Properties.Settings.Default.SaveFolders)
                 {
+                    if (!Directory.Exists(path))
+                    {
+                        logMessage($"Save path {path} does not exist; disregarding.");
+                        continue;
+                    }
                     lstSaveFolders.Items.Add(path);
-                    var watcher = new SaveWatcher(path);
-                    watcher.LogMessage += SaveWatcher_LogMessage;
-                    watcher.WorldWatcher.Changed += OnSaveFileChanged;
-                    watcher.WorldWatcher.Created += OnSaveFileChanged;
-                    watcher.WorldWatcher.Renamed += OnSaveFileChanged;
-
-                    watcher.CharacterWatcher.Changed += OnSaveFileChanged;
-                    watcher.CharacterWatcher.Created += OnSaveFileChanged;
-                    watcher.CharacterWatcher.Renamed += OnSaveFileChanged;
-                    saveWatchers.Add(watcher);
+                    AddToSaveWatchers(path);
                 }
                 lstSaveFolders.Items.Refresh();
                 if (lstSaveFolders.Items.Count > 1)
@@ -181,17 +177,12 @@ namespace ValheimSaveShield
                     lblSaveFolders.Content = "Save Folder";
                 }
             }
-            else if (Properties.Settings.Default.SaveFolder.Length != 0 && Directory.Exists(Properties.Settings.Default.SaveFolder))
-            {
-                lstSaveFolders.Items.Add(Properties.Settings.Default.SaveFolder);
-                lstSaveFolders.Items.Refresh();
-                Properties.Settings.Default.SaveFolders.Add(Properties.Settings.Default.SaveFolder);
-                Properties.Settings.Default.FtpSaveDest = Properties.Settings.Default.SaveFolder;
-                Properties.Settings.Default.Save();
-            } else
+            else
             {
                 logMessage("Reverting to default save folder.");
                 lstSaveFolders.Items.Add(defaultSaveFolder);
+                AddToSaveWatchers(defaultSaveFolder);
+
                 lstSaveFolders.Items.Refresh();
                 Properties.Settings.Default.SaveFolders.Add(defaultSaveFolder);
                 Properties.Settings.Default.FtpSaveDest = defaultSaveFolder;
@@ -227,6 +218,19 @@ namespace ValheimSaveShield
             {
                 logMessage($"Error responding to SaveWatcher LogMessage event: {ex.Message}", LogType.Error);
             }
+        }
+
+        private void AddToSaveWatchers(string path)
+        {
+            var watcher = new SaveWatcher(path, SaveWatcher_LogMessage);
+            watcher.WorldWatcher.Changed += OnSaveFileChanged;
+            watcher.WorldWatcher.Created += OnSaveFileChanged;
+            watcher.WorldWatcher.Renamed += OnSaveFileChanged;
+
+            watcher.CharacterWatcher.Changed += OnSaveFileChanged;
+            watcher.CharacterWatcher.Created += OnSaveFileChanged;
+            watcher.CharacterWatcher.Renamed += OnSaveFileChanged;
+            saveWatchers.Add(watcher);
         }
 
         private void NotifyIcon_Click(object sender, EventArgs e)
@@ -449,31 +453,38 @@ namespace ValheimSaveShield
 
         private void doBackup(string savepath)
         {
-            SaveFile save = new SaveFile(savepath);
-            if (!save.BackedUp)
+            try
             {
-                try
+                new Thread(() =>
                 {
-                    SaveBackup backup = save.PerformBackup();
-                    if (backup != null)
+                    Thread.CurrentThread.IsBackground = true;
+                    SaveFile save = new SaveFile(savepath);
+                    if (!save.BackedUp)
                     {
-                        listBackups.Add(backup);
-                        checkBackupLimits();
-                        listBackups = listBackups.OrderByDescending(x => x.SaveDate).ToList();
-                        dataBackups.ItemsSource = listBackups;
-                        dataBackups.Items.Refresh();
-                        this.IsBackupCurrent = this.IsBackupCurrent;
-                        logMessage($"Backup of {backup.Type.ToLower()} {backup.Name} completed!", LogType.Success);
+                        SaveBackup backup = save.PerformBackup();
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            if (backup != null)
+                            {
+                                listBackups.Add(backup);
+                                checkBackupLimits();
+                                listBackups = listBackups.OrderByDescending(x => x.SaveDate).ToList();
+                                dataBackups.ItemsSource = listBackups;
+                                dataBackups.Items.Refresh();
+                                this.IsBackupCurrent = this.IsBackupCurrent;
+                                logMessage($"Backup of {backup.Type.ToLower()} {backup.Name} completed!", LogType.Success);
+                            }
+                            else
+                            {
+                                logMessage($"Backup of {save.Type.ToLower()} {save.Name} failed!", LogType.Error);
+                            }
+                        });
                     }
-                    else
-                    {
-                        logMessage($"Backup of {save.Type.ToLower()} {save.Name} failed!", LogType.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logMessage($"Error attempting backup of {savepath}: {ex.Message}");
-                }
+                }).Start();
+            }
+            catch (Exception ex)
+            {
+                logMessage($"Error attempting backup of {savepath}: {ex.Message}");
             }
         }
 
@@ -571,8 +582,8 @@ namespace ValheimSaveShield
 
         private void OnSaveTimerElapsed(Object source, ElapsedEventArgs e)
         {
-            this.Dispatcher.Invoke(() =>
-            {
+            //this.Dispatcher.Invoke(() =>
+            //{
                 try
                 {
                     var timer = (SaveTimer)source;
@@ -583,10 +594,13 @@ namespace ValheimSaveShield
                     }
                     else
                     {
-                        this.IsBackupCurrent = false;
-                        dataBackups.Items.Refresh();
-                        TimeSpan span = (timer.Save.BackupDueTime - DateTime.Now);
-                        logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes left until next backup is due.");
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            this.IsBackupCurrent = false;
+                            dataBackups.Items.Refresh();
+                            TimeSpan span = (timer.Save.BackupDueTime - DateTime.Now);
+                            logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes left until next backup is due.");
+                        });
                     }
                     //var timer = saveTimers[e.Save.FullPath];
                     saveTimers.Remove(timer.Save.FullPath);
@@ -596,7 +610,7 @@ namespace ValheimSaveShield
                 {
                     logMessage($"{ex.GetType()} processing save file change: {ex.Message} ({ex.StackTrace})");
                 }
-            });
+            //});
         }
 
         private void TxtBackupMins_LostFocus(object sender, RoutedEventArgs e)
@@ -1300,16 +1314,10 @@ namespace ValheimSaveShield
                 }
                 lstSaveFolders.Items.Add(folderName);
                 lblSaveFolders.Content = "Save Folders";
-                var watcher = new SaveWatcher(folderName);
-                watcher.LogMessage += SaveWatcher_LogMessage;
-                watcher.WorldWatcher.Changed += OnSaveFileChanged;
-                watcher.WorldWatcher.Created += OnSaveFileChanged;
-                watcher.WorldWatcher.Renamed += OnSaveFileChanged;
+                //var watcher = new SaveWatcher(folderName);
+                //watcher.LogMessage += SaveWatcher_LogMessage;
+                AddToSaveWatchers(folderName);
 
-                watcher.CharacterWatcher.Changed += OnSaveFileChanged;
-                watcher.CharacterWatcher.Created += OnSaveFileChanged;
-                watcher.CharacterWatcher.Renamed += OnSaveFileChanged;
-                saveWatchers.Add(watcher);
                 Properties.Settings.Default.SaveFolders.Add(folderName);
                 Properties.Settings.Default.Save();
             }
@@ -1362,16 +1370,9 @@ namespace ValheimSaveShield
                         break;
                     }
                 }
-                var watcher = new SaveWatcher(folderName);
-                watcher.LogMessage += SaveWatcher_LogMessage;
-                watcher.WorldWatcher.Changed += OnSaveFileChanged;
-                watcher.WorldWatcher.Created += OnSaveFileChanged;
-                watcher.WorldWatcher.Renamed += OnSaveFileChanged;
-
-                watcher.CharacterWatcher.Changed += OnSaveFileChanged;
-                watcher.CharacterWatcher.Created += OnSaveFileChanged;
-                watcher.CharacterWatcher.Renamed += OnSaveFileChanged;
-                saveWatchers.Add(watcher);
+                //var watcher = new SaveWatcher(folderName);
+                //watcher.LogMessage += SaveWatcher_LogMessage;
+                AddToSaveWatchers(folderName);
                 Properties.Settings.Default.SaveFolders.Remove(saveDirPath);
                 Properties.Settings.Default.SaveFolders.Add(folderName);
                 if (Properties.Settings.Default.FtpSaveDest == saveDirPath)

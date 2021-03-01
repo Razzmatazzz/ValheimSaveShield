@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,18 +14,20 @@ namespace ValheimSaveShield
         public FileSystemWatcher CharacterWatcher { get; set; }
         public string SavePath { get; set; }
         public event EventHandler<SaveWatcherLogMessageEventArgs> LogMessage;
-        public SaveWatcher(string path)
+        public SaveWatcher(string path) : this(path, null) { }
+        public SaveWatcher(string path, EventHandler<SaveWatcherLogMessageEventArgs> logEventHandler)
         {
+            if (logEventHandler != null)
+            {
+                LogMessage += logEventHandler;
+            }
             SavePath = path;
             WorldWatcher = new FileSystemWatcher();
-            if (Directory.Exists($@"{path}\worlds"))
+            if (!Directory.Exists($@"{path}\worlds"))
             {
-                WorldWatcher.Path = $@"{path}\worlds";
+                Directory.CreateDirectory($@"{path}\worlds");
             }
-            else
-            {
-                logMessage($@"Folder {path}\worlds does not exist. Please set the correct location of your save files.", LogType.Error);
-            }
+            WorldWatcher.Path = $@"{path}\worlds";
 
             // Watch for changes in LastWrite times.
             WorldWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;
@@ -33,30 +36,21 @@ namespace ValheimSaveShield
             WorldWatcher.Filter = "*.db";
 
             CharacterWatcher = new FileSystemWatcher();
-            if (Directory.Exists($@"{path}\characters"))
-            {
-                CharacterWatcher.Path = $@"{path}\characters";
-            }
-            else
+            if (!Directory.Exists($@"{path}\characters"))
             {
                 Directory.CreateDirectory($@"{path}\characters");
-                //logMessage($@"Folder {saveDirPath}\characters does not exist. Please set the correct location of your save files.", LogType.Error);
             }
+            CharacterWatcher.Path = $@"{path}\characters";
 
             // Watch for changes in LastWrite and file creation times.
             CharacterWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;
 
             // Only watch .fch files.
             CharacterWatcher.Filter = "*.fch";
-
-            if (WorldWatcher.Path == "")
-            {
-                WorldWatcher.EnableRaisingEvents = false;
-            }
-            if (CharacterWatcher.Path == "")
-            {
-                CharacterWatcher.EnableRaisingEvents = false;
-            }
+        }
+        private void logMessage(string message)
+        {
+            logMessage(message, LogType.Normal);
         }
         private void logMessage(string message, LogType logtype)
         {
