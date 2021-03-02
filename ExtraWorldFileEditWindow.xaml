@@ -1,0 +1,28 @@
+﻿<Window x:Class="ValheimSaveShield.ExtraWorldFileEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ValheimSaveShield"
+        mc:Ignorable="d"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="File Extension" SizeToContent="Height" Width="200" ResizeMode="NoResize" FocusManager.FocusedElement="{Binding ElementName=txtExtension}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBox x:Name="txtExtension" Margin="5" Grid.Row="0" />
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnOK" Content="OK" Margin="5" Grid.Column="1" Click="btnOK_Click"/>
+            <Button x:Name="btnCancel" Content="Cancel" Margin="5" Grid.Column="2" Click="btnCancel_Click"/>
+        </Grid>
+    </Grid>
+</Window>

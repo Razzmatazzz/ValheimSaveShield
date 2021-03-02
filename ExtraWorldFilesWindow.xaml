@@ -1,0 +1,57 @@
+﻿<Window x:Class="ValheimSaveShield.ExtraWorldFilesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ValheimSaveShield"
+        mc:Ignorable="d"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Title="Extra World Files" Height="350" Width="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Expander x:Name="expTip" Header="Instructions" Margin="10" Grid.Row="0">
+            <TextBlock TextWrapping="Wrap" Margin="10">
+            If you're using a mod that generates additional files in your worlds folder that you want backed up, you can list the additional file extensions here. To be supported, the additional world files must adhere to the Worldname.ext naming format where Worldname is the name of your world and .ext is the extension of the file. 
+            <LineBreak/>
+            <LineBreak/>
+            For example: to back up an .ext file, you would add .ext to the list below.
+            </TextBlock>
+        </Expander>
+        <ListBox x:Name="lstExtensions" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ListBox.ContextMenu>
+                <ContextMenu x:Name="menuExtensions" Opened="menuExtensions_Opened">
+                    <MenuItem x:Name="menuAdd" Header="Add" Click="menuAdd_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/Add_32x.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="menuEdit" Header="Edit" Click="menuEdit_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/Edit_32x.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="menuRemove" Header="Remove" Click="menuRemove_Click">
+                        <MenuItem.Icon>
+                            <Image Source="Resources/Remove_32x.png"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnSave" Content="Save" Margin="10" Grid.Column="1" Click="btnSave_Click"/>
+            <Button x:Name="btnCancel" Content="Cancel" Margin="10" Grid.Column="2" Click="btnCancel_Click"/>
+        </Grid>
+    </Grid>
+</Window>

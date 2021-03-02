@@ -28,7 +28,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (this.saveData.label == "")
+                if (this.saveData.label == "" || this.saveData.label == null)
                 {
                     return this.DefaultLabel;
                 }
@@ -39,7 +39,7 @@ namespace ValheimSaveShield
             }
             set
             {
-                if (value == "")
+                if (value == "" || value == null)
                 {
                     this.saveData.label = this.DefaultLabel;
                 } else
@@ -205,6 +205,15 @@ namespace ValheimSaveShield
                 string sourcefwl = info.DirectoryName + "\\" + this.Name + ".fwl";
                 string destfwl = destInfo.DirectoryName + "\\" + this.Name + ".fwl";
                 File.Copy(sourcefwl, destfwl, true);
+                foreach (var ext in Properties.Settings.Default.WorldFileExtensions)
+                {
+                    string sourcefile = info.DirectoryName + "\\" + this.Name + ext;
+                    if (File.Exists(sourcefile))
+                    {
+                        string destfile = destInfo.DirectoryName + "\\" + this.Name + ext;
+                        File.Copy(sourcefile, destfile, true);
+                    }
+                }
             }
         }
 

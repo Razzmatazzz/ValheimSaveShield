@@ -248,13 +248,36 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Setting {
+        public global::System.Collections.Specialized.StringCollection WorldFileExtensions {
             get {
-                return ((string)(this["Setting"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["WorldFileExtensions"]));
             }
             set {
-                this["Setting"] = value;
+                this["WorldFileExtensions"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        public double MainWindowWidth {
+            get {
+                return ((double)(this["MainWindowWidth"]));
+            }
+            set {
+                this["MainWindowWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("500")]
+        public double MainWindowHeight {
+            get {
+                return ((double)(this["MainWindowHeight"]));
+            }
+            set {
+                this["MainWindowHeight"] = value;
             }
         }
     }

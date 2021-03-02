@@ -117,6 +117,8 @@ namespace ValheimSaveShield
                 Properties.Settings.Default.UpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
+            Width = Properties.Settings.Default.MainWindowWidth;
+            Height = Properties.Settings.Default.MainWindowHeight;
             if (Properties.Settings.Default.SaveFolders == null)
             {
                 Properties.Settings.Default.SaveFolders = new StringCollection();
@@ -140,6 +142,11 @@ namespace ValheimSaveShield
             if (Properties.Settings.Default.CharBackupKeep == null)
             {
                 Properties.Settings.Default.CharBackupKeep = new StringDictionary();
+                Properties.Settings.Default.Save();
+            }
+            if (Properties.Settings.Default.WorldFileExtensions == null)
+            {
+                Properties.Settings.Default.WorldFileExtensions = new StringCollection();
                 Properties.Settings.Default.Save();
             }
             if (Properties.Settings.Default.BackupFolder.Length == 0)
@@ -785,34 +792,13 @@ namespace ValheimSaveShield
             return keeps;
         }
 
-        private void DataBackups_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
-        {
-            if (e.Column.Header.ToString().Equals("Name") || 
-                e.Column.Header.ToString().Equals("Type") ||
-                e.Column.Header.ToString().Equals("SaveDate") ||
-                e.Column.Header.ToString().Equals("Active")) e.Cancel = true;
-        }
-
-        private void DataBackups_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            if (e.Column.Header.ToString().Equals("Name") && e.EditAction == DataGridEditAction.Commit)
-            {
-                SaveBackup sb = (SaveBackup)e.Row.Item;
-                if (sb.Label.Equals(""))
-                {
-                    sb.Label = sb.SaveDate.Ticks.ToString();
-                }
-            }
-        }
-
         private void updateSavedLabels()
         {
             var savedWorldLabels = new StringDictionary();
             var savedCharLabels = new StringDictionary();
-            for (int i = 0; i < listBackups.Count; i++)
+            foreach (var s in listBackups) 
             {
-                SaveBackup s = listBackups[i];
-                if (!s.Label.Equals(s.DefaultLabel))
+                if (s.Label != s.DefaultLabel)
                 {
                     if (s.Type.Equals("World"))
                     {
@@ -957,7 +943,9 @@ namespace ValheimSaveShield
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            //any cleanup to do before exit
+            Properties.Settings.Default.MainWindowWidth = Width;
+            Properties.Settings.Default.MainWindowHeight = Height;
+            Properties.Settings.Default.Save();
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -1042,17 +1030,7 @@ namespace ValheimSaveShield
 
         private void DataBackups_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            if (e.Column.Header.Equals("DefaultLabel") ||
-                e.Column.Header.Equals("FileName") ||
-                e.Column.Header.Equals("FullPath") ||
-                e.Column.Header.Equals("Folder") ||
-                e.Column.Header.Equals("ActivePaths")) {
-                e.Cancel = true;
-            } 
-            else if (e.Column.Header.Equals("SaveDate"))
-            {
-                //e.Column.SortDirection = System.ComponentModel.ListSortDirection.Ascending;
-            }
+            e.Cancel = true;
         }
 
         private void btnAppUpdate_Click(object sender, RoutedEventArgs e)
@@ -1552,6 +1530,26 @@ namespace ValheimSaveShield
             catch (Exception ex)
             {
                 logMessage($"Error showing map: {ex.Message}", LogType.Error);
+            }
+        }
+
+        private void btnExtraWorldFiles_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new ExtraWorldFilesWindow();
+            win.Owner = this;
+            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            win.ShowDialog();
+        }
+
+        private void dataBackups_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (dataBackups.SelectedIndex > -1)
+            {
+                menuBackups.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                menuBackups.Visibility = Visibility.Collapsed;
             }
         }
     }

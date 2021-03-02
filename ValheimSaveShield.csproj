@@ -109,6 +109,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ExtraWorldFileEditWindow.xaml.cs">
+      <DependentUpon>ExtraWorldFileEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ExtraWorldFilesWindow.xaml.cs">
+      <DependentUpon>ExtraWorldFilesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FtpSettingsWindow.xaml.cs">
       <DependentUpon>FtpSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -122,6 +128,14 @@
     </Compile>
     <Compile Include="SaveWatcher.cs" />
     <Compile Include="SynchronizeDirectories.cs" />
+    <Page Include="ExtraWorldFileEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ExtraWorldFilesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="FtpSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -180,6 +194,7 @@
     <Resource Include="Resources\Edit_32x.png" />
     <Resource Include="Resources\Edit_grey_32x.png" />
     <Resource Include="Resources\MapTileLayer_32x.png" />
+    <Resource Include="Resources\ExclamationPoint_32x.png" />
     <Content Include="Resources\vss.ico" />
     <Resource Include="Resources\vss_32.png" />
     <Resource Include="SaveAll_32x.ico" />

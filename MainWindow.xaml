@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
-        Title="Valheim Save Shield" Height="450" Width="800" Loaded="Window_Loaded" Icon="Resources/vss_32.png" Closing="Window_Closing" Closed="Window_Closed" Deactivated="Window_Deactivated" MinHeight="200" MinWidth="300" StateChanged="Window_StateChanged" IsVisibleChanged="Window_IsVisibleChanged" ContentRendered="Window_ContentRendered">
+        Title="Valheim Save Shield" Height="500" Width="800" Loaded="Window_Loaded" Icon="Resources/vss_32.png" Closing="Window_Closing" Closed="Window_Closed" Deactivated="Window_Deactivated" MinHeight="200" MinWidth="300" StateChanged="Window_StateChanged" IsVisibleChanged="Window_IsVisibleChanged" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <Image x:Key="Save" Source="Resources/Save_32x.png"/>
         <Image x:Key="SaveGrey" Source="Resources/Save_grey_32x.png"/>
@@ -38,7 +38,15 @@
         </Grid>-->
         <TabControl Grid.Row="0" TabIndex="5">
             <TabItem x:Name="tabBackups" Header="Backups">
-                <DataGrid x:Name="dataBackups" BeginningEdit="DataBackups_BeginningEdit" SelectionMode="Single" CanUserDeleteRows="False" CellEditEnding="DataBackups_CellEditEnding" AutoGeneratingColumn="DataBackups_AutoGeneratingColumn">
+                <DataGrid x:Name="dataBackups" SelectionMode="Single" CanUserDeleteRows="False" AutoGeneratingColumn="DataBackups_AutoGeneratingColumn" ContextMenuOpening="dataBackups_ContextMenuOpening">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label" Binding="{Binding Path=Label}"/>
+                        <DataGridCheckBoxColumn Header="Keep" Binding="{Binding Path=Keep}"/>
+                        <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Path=Name, Mode=OneWay}"/>
+                        <DataGridTextColumn Header="Type" IsReadOnly="True" Binding="{Binding Path=Type, Mode=OneWay}"/>
+                        <DataGridTextColumn Header="Save Date" IsReadOnly="True" Binding="{Binding Path=SaveDate, Mode=OneWay}"/>
+                        <DataGridCheckBoxColumn Header="Active" IsReadOnly="True" Binding="{Binding Path=Active, Mode=OneWay}"/>
+                    </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu x:Name="menuBackups" Opened="menuBackups_Opened">
                             <MenuItem x:Name="menuBackupsRestore" Header="Restore" Click="menuBackupsRestore_Click">
@@ -63,6 +71,7 @@
             <TabItem x:Name="tabSettings" Header="Settings">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -126,6 +135,7 @@
                     <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Grid.Row="6" Grid.ColumnSpan="2" Checked="chkCreateLogFile_Click" Unchecked="chkCreateLogFile_Click"/>
                     <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,5,0,10" VerticalAlignment="Center" Grid.Row="7" Grid.ColumnSpan="2" Checked="chkAutoCheckUpdate_Click"/>
                     <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="250,5,0,10" VerticalAlignment="Center" Click="btnAppUpdate_Click" Grid.Row="7" Grid.ColumnSpan="2" />
+                    <Button x:Name="btnExtraWorldFiles" Content="Extra world files" ToolTip="Back up additional files from your /worlds folder" HorizontalAlignment="Left" Margin="10,5" Grid.Row="8" Grid.ColumnSpan="2" Click="btnExtraWorldFiles_Click"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
@@ -141,7 +151,7 @@
                 </Label>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Left">
-                <Button x:Name="btnBackup" Click="BtnBackup_Click" ToolTip="Backup current save"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0" Height="26" VerticalContentAlignment="Center">
+                <Button x:Name="btnBackup" Click="BtnBackup_Click" ToolTip="Backup current saves"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,0" Height="26" VerticalContentAlignment="Center">
                     <DynamicResource ResourceKey="Save"/>
                 </Button>
             </StatusBarItem>

@@ -146,6 +146,15 @@ namespace ValheimSaveShield
                     string sourcefwl = info.DirectoryName + "\\" + this.Name + ".fwl";
                     string destfwl = this.BackupFolder + "\\" + this.Name + ".fwl";
                     File.Copy(sourcefwl, destfwl, true);
+                    foreach (var ext in Properties.Settings.Default.WorldFileExtensions)
+                    {
+                        string sourcefile = info.DirectoryName + "\\" + this.Name + ext;
+                        if (File.Exists(sourcefile))
+                        {
+                            string destfile = this.BackupFolder + "\\" + this.Name + ext;
+                            File.Copy(sourcefile, destfile, true);
+                        }
+                    }
                 }
                 return new SaveBackup(this.BackupPath);
             }
