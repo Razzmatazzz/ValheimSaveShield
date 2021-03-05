@@ -107,13 +107,37 @@ namespace ValheimSaveShield
                     try
                     {
                         session.Open(sessionOptions);
-                        ModernMessageBox mmb = new ModernMessageBox(this);
-                        mmb.Show("Connection successful.", "Connection Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                        if (session.FileExists(txtWorldsPath.Text))
+                        {
+                            var dbFound = false;
+                            foreach (var file in session.ListDirectory(txtWorldsPath.Text).Files)
+                            {
+                                if (file.ToString().EndsWith(".db"))
+                                {
+                                    dbFound = true;
+                                }
+                            }
+                            if (dbFound)
+                            {
+                                ModernMessageBox mmb = new ModernMessageBox(this);
+                                mmb.Show("Connection successful.", "Connection Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                ModernMessageBox mmb = new ModernMessageBox(this);
+                                mmb.Show($"Connected successfully, but no world saves found at {txtWorldsPath.Text}.", "No Worlds Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                        }
+                        else
+                        {
+                            ModernMessageBox mmb = new ModernMessageBox(this);
+                            mmb.Show($"Connected successfully to FTP server, but path {txtWorldsPath.Text} does not exist.", "Path Not Found", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     catch (Exception ex)
                     {
                         ModernMessageBox mmb = new ModernMessageBox(this);
-                        mmb.Show($"Error connecting to FTP server: {ex.Message}", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        mmb.Show($"Error connecting to FTP server: {ex.Message}", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
