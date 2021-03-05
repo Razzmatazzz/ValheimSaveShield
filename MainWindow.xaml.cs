@@ -1116,7 +1116,8 @@ namespace ValheimSaveShield
                             '/' + Properties.Settings.Default.FtpFilePath,
                             Properties.Settings.Default.FtpSaveDest + "\\worlds",
                             Properties.Settings.Default.FtpUsername,
-                            Properties.Settings.Default.FtpPassword
+                            Properties.Settings.Default.FtpPassword,
+                            (WinSCP.FtpMode)Properties.Settings.Default.FtpMode
                         );
                         if (syncstatus == 0)
                         {

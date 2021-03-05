@@ -19,6 +19,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -28,15 +30,17 @@
         <Label Content="Port" Margin="5" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1"/>
         <TextBox x:Name="txtIP" Margin="5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
         <TextBox x:Name="txtPort" Margin="5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"/>
-        <Label Content="Worlds Path" Margin="5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="txtWorldsPath" Margin="5" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <Label Content="Worlds Path" ToolTip="The path on the FTP server to the folder containing your world files" Margin="5" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="txtWorldsPath" ToolTip="The path on the FTP server to the folder containing your world files" Margin="5" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
         <Label Content="Username" Margin="5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0"/>
         <Label Content="Password" Margin="5" VerticalAlignment="Center" Grid.Row="4" Grid.Column="1"/>
         <TextBox x:Name="txtUsername" Margin="5" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0"/>
         <TextBox x:Name="txtPassword" Margin="5" VerticalAlignment="Center" Grid.Row="5" Grid.Column="1"/>
-        <Label Content="Local Save Folder Destination" Margin="5" VerticalAlignment="Center" Grid.Row="6" Grid.ColumnSpan="2"/>
-        <ListBox x:Name="lstSaveFolder" Margin="5" Grid.Row="7" Grid.ColumnSpan="2"/>
-        <Grid Grid.Row="8" Grid.ColumnSpan="2">
+        <Label Content="FTP Mode" Margin="5" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0"/>
+        <ComboBox x:Name="cmbFtpMode" Margin="5" VerticalAlignment="Center" Grid.Row="7" Grid.Column="0" />
+        <Label Content="Local Save Folder Destination" ToolTip="The local save folder where you want the remote worlds saved" Margin="5" VerticalAlignment="Center" Grid.Row="8" Grid.ColumnSpan="2"/>
+        <ListBox x:Name="lstSaveFolder" ToolTip="The local save folder where you want the remote worlds saved" Margin="5" Grid.Row="9" Grid.ColumnSpan="2"/>
+        <Grid Grid.Row="10" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="Auto"/>

@@ -13,7 +13,7 @@ namespace ValheimSaveShield
                 return _lasterror;
             }
         }
-        public static int remoteSync(string hostUrl, string port, string hostDirectory, string localDirectory, string userName, string password)
+        public static int remoteSync(string hostUrl, string port, string hostDirectory, string localDirectory, string userName, string password, FtpMode ftpMode)
         {
             try
             {
@@ -24,7 +24,8 @@ namespace ValheimSaveShield
                     HostName = hostUrl,
                     PortNumber = Int32.Parse(port),
                     UserName = userName,
-                    Password = password
+                    Password = password,
+                    FtpMode = ftpMode
                 };
 
                 using (Session session = new Session())

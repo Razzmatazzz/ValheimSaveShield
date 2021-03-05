@@ -42,6 +42,13 @@ namespace ValheimSaveShield
             {
                 lstSaveFolder.SelectedIndex = 0;
             }
+
+            foreach (int i in Enum.GetValues(typeof(FtpMode)))
+            {
+                cmbFtpMode.Items.Add(Enum.GetName(typeof(FtpMode), i));
+            }
+            cmbFtpMode.SelectedIndex = Properties.Settings.Default.FtpMode;
+
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -61,6 +68,7 @@ namespace ValheimSaveShield
             Properties.Settings.Default.FtpFilePath = txtWorldsPath.Text;
             Properties.Settings.Default.FtpUsername = txtUsername.Text;
             Properties.Settings.Default.FtpPassword = txtPassword.Text;
+            Properties.Settings.Default.FtpMode = cmbFtpMode.SelectedIndex;
             Properties.Settings.Default.FtpSaveDest = lstSaveFolder.SelectedItem.ToString();
             Properties.Settings.Default.Save();
 
@@ -89,7 +97,8 @@ namespace ValheimSaveShield
                     HostName = txtIP.Text,
                     PortNumber = Int32.Parse(txtPort.Text),
                     UserName = txtUsername.Text,
-                    Password = txtPassword.Text
+                    Password = txtPassword.Text,
+                    FtpMode = (FtpMode)cmbFtpMode.SelectedIndex
                 };
 
                 using (Session session = new Session())
