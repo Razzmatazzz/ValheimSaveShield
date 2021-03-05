@@ -72,7 +72,7 @@ namespace ValheimSaveShield
             }
         }
 
-        public string BackupPath
+        public string FullBackupPath
         {
             get
             {
@@ -92,7 +92,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                return File.Exists(this.BackupPath);
+                return File.Exists(this.FullBackupPath);
             }
         }
 
@@ -143,7 +143,7 @@ namespace ValheimSaveShield
                 {
                     Directory.CreateDirectory(backupFolder);
                 }
-                File.Copy(this.FullPath, this.BackupPath, true);
+                File.Copy(this.FullPath, this.FullBackupPath, true);
                 if (this.Type.Equals("World"))
                 {
                     FileInfo info = new FileInfo(this.FullPath);
@@ -160,7 +160,7 @@ namespace ValheimSaveShield
                         }
                     }
                 }
-                return new SaveBackup(this.BackupPath);
+                return new SaveBackup(this.FullBackupPath);
             }
             catch (IOException ex)
             {

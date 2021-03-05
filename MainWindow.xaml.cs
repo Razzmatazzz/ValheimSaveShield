@@ -296,11 +296,14 @@ namespace ValheimSaveShield
                 string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds");
                 foreach (string w in worldBackups)
                 {
-                    string name = w.Replace($@"{backupDirPath}\worlds", "");
+                    //string name = w.Replace($@"{backupDirPath}\worlds", "");
                     string[] backupDirs = Directory.GetDirectories(w);
                     foreach (string backupDir in backupDirs)
                     {
-                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.db");
+                        string[] files = System.IO.Directory.GetFiles(backupDir, "*.db");
+                        if (files.Length < 1) continue;
+                        var name = new FileInfo(files[0]).Name;
+                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}");
                         if (backupWorldNames.ContainsKey(backup.SaveDate.Ticks))
                         {
                             backup.Label = backupWorldNames[backup.SaveDate.Ticks];
@@ -321,11 +324,14 @@ namespace ValheimSaveShield
                 string[] charBackups = Directory.GetDirectories($@"{backupDirPath}\characters");
                 foreach (string c in charBackups)
                 {
-                    string name = c.Replace($@"{backupDirPath}\characters", "");
+                    //string name = c.Replace($@"{backupDirPath}\characters", "");
                     string[] backupDirs = Directory.GetDirectories(c);
                     foreach (string backupDir in backupDirs)
                     {
-                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}.fch");
+                        string[] files = System.IO.Directory.GetFiles(backupDir, "*.fch");
+                        if (files.Length < 1) continue;
+                        var name = new FileInfo(files[0]).Name;
+                        SaveBackup backup = new SaveBackup($@"{backupDir}\{name}");
                         if (backupCharNames.ContainsKey(backup.SaveDate.Ticks))
                         {
                             backup.Label = backupCharNames[backup.SaveDate.Ticks];
@@ -343,10 +349,6 @@ namespace ValheimSaveShield
                 //listBackups.Sort();
                 listBackups = listBackups.OrderByDescending(x => x.SaveDate).ToList();
                 dataBackups.ItemsSource = listBackups;
-                if (listBackups.Count > 0)
-                {
-                    //logMessage("Last backup save date: " + listBackups[listBackups.Count - 1].SaveDate.ToString());
-                }
             }
             catch (Exception ex)
             {
@@ -1000,14 +1002,6 @@ namespace ValheimSaveShield
                         List<String> backupFolders = Directory.GetDirectories(backupDirPath).ToList();
                         foreach (string file in backupFolders)
                         {
-                            /*string subFolderName = file.Substring(file.LastIndexOf(@"\"));
-                            Directory.CreateDirectory(folderName + subFolderName);
-                            Directory.SetCreationTime(folderName + subFolderName, Directory.GetCreationTime(file));
-                            Directory.SetLastWriteTime(folderName + subFolderName, Directory.GetCreationTime(file));
-                            foreach (string filename in Directory.GetFiles(file))
-                            {
-                                File.Copy(filename, filename.Replace(backupDirPath, folderName));
-                            }*/
                             Directory.Delete(file, true);
                         }
                     }
@@ -1091,14 +1085,6 @@ namespace ValheimSaveShield
                     syncDirectoriesAsync();
                 }
             }
-            // Only do something if user clicks OK
-            /*if (GetFtpSettings())
-            {
-                if (ftpDirectorySync == null)
-                {
-                    syncDirectoriesAsync();
-                }
-            }*/
         }
 
         private void syncDirectoriesAsync()
@@ -1287,10 +1273,6 @@ namespace ValheimSaveShield
                 }
                 if (!Directory.Exists($@"{folderName}\worlds"))
                 {
-                    /*ModernMessageBox mmbWarn = new ModernMessageBox(this);
-                    mmbWarn.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder.",
-                                     "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
-                    return;*/
                     Directory.CreateDirectory($@"{folderName}\worlds");
                     logMessage($"{folderName} did not contain a \"worlds\" folder, so it may not be a valid save location.");
                 }
@@ -1300,8 +1282,6 @@ namespace ValheimSaveShield
                 }
                 lstSaveFolders.Items.Add(folderName);
                 lblSaveFolders.Content = "Save Folders";
-                //var watcher = new SaveWatcher(folderName);
-                //watcher.LogMessage += SaveWatcher_LogMessage;
                 AddToSaveWatchers(folderName);
 
                 Properties.Settings.Default.SaveFolders.Add(folderName);
@@ -1335,10 +1315,6 @@ namespace ValheimSaveShield
                 }
                 if (!Directory.Exists($@"{folderName}\worlds"))
                 {
-                    /*ModernMessageBox mmbWarn = new ModernMessageBox(this);
-                    mmbWarn.Show("Please select the folder where your Valheim save files are located. This folder should contain both a \"worlds\" and a \"characters\" folder.",
-                                     "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
-                    return;*/
                     Directory.CreateDirectory($@"{folderName}\worlds");
                     logMessage($"{folderName} did not contain a \"worlds\" folder, so it may not be a valid save location.");
                 }
@@ -1356,8 +1332,6 @@ namespace ValheimSaveShield
                         break;
                     }
                 }
-                //var watcher = new SaveWatcher(folderName);
-                //watcher.LogMessage += SaveWatcher_LogMessage;
                 AddToSaveWatchers(folderName);
                 Properties.Settings.Default.SaveFolders.Remove(saveDirPath);
                 Properties.Settings.Default.SaveFolders.Add(folderName);
@@ -1399,13 +1373,6 @@ namespace ValheimSaveShield
                 lblSaveFolders.Content = "Save Folder";
             }
             Properties.Settings.Default.Save();
-        }
-
-        private void MenuRestorePath_Click(object sender, RoutedEventArgs e)
-        {
-            SaveBackup selectedBackup = (SaveBackup)dataBackups.SelectedItem;
-            MenuItem menu = (MenuItem)sender;
-            restoreBackup(selectedBackup, menu.Tag.ToString());
         }
 
         private void menuBackups_Opened(object sender, RoutedEventArgs e)

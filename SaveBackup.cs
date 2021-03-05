@@ -12,49 +12,47 @@ namespace ValheimSaveShield
 {
     public class SaveBackup : IEditableObject, IComparable
     {
-        struct SaveData
+        struct BackupData
         {
-            internal string savePath;
+            internal string backupPath;
             internal string label;
             //internal string type;
-            internal DateTime date;
             internal bool keep;
         }
 
         public event EventHandler<UpdatedEventArgs> Updated;
-        private SaveData saveData;
-        private SaveData backupData;
+        private BackupData backupData;
+        private BackupData backupDataBackup;
         private bool inTxn = false;
         public string Label
         {
             get
             {
-                if (this.saveData.label == "" || this.saveData.label == null)
+                if (this.backupData.label == "" || this.backupData.label == null)
                 {
                     return this.DefaultLabel;
                 }
                 else
                 {
-                    return this.saveData.label;
+                    return this.backupData.label;
                 }
             }
             set
             {
                 if (value == "" || value == null)
                 {
-                    this.saveData.label = this.DefaultLabel;
+                    this.backupData.label = this.DefaultLabel;
                 } else
                 {
-                    this.saveData.label = value;
+                    this.backupData.label = value;
                 }
-                //OnUpdated(new UpdatedEventArgs("Name"));
             }
         }
         public string Name
         {
             get
             {
-                var fileName = new FileInfo(this.saveData.savePath).Name;
+                var fileName = new FileInfo(this.backupData.backupPath).Name;
                 var parts = new ArrayList(FileName.Split('.'));
                 parts.RemoveAt(parts.Count - 1);
                 return string.Join(".", parts.ToArray()).Trim();
@@ -65,7 +63,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (new FileInfo(this.saveData.savePath).Directory.FullName.StartsWith($@"{Properties.Settings.Default.BackupFolder}\worlds\"))
+                if (new FileInfo(this.backupData.backupPath).Directory.FullName.StartsWith($@"{Properties.Settings.Default.BackupFolder}\worlds\"))
                 {
                     return "World";
                 }
@@ -73,69 +71,52 @@ namespace ValheimSaveShield
                 {
                     return "Character";
                 }
-                //return this.saveData.type;
             }
-            /*set
-            {
-                this.saveData.type = value;
-            }*/
         }
         public string DefaultLabel
         {
             get
             {
-                return this.Name + " " + Math.Abs(this.saveData.date.Ticks % 10000);
+                return this.Name + " " + Math.Abs(this.SaveDate.Ticks % 10000);
             }
         }
         public DateTime SaveDate
         {
             get {
-                return this.saveData.date;
-            }
-            set
-            {
-                this.saveData.date = value;
-                //OnUpdated(new UpdatedEventArgs("SaveDate"));
+                return File.GetLastWriteTime(this.FullPath);
             }
         }
         public bool Keep
         {
             get
             {
-                return this.saveData.keep;
+                return this.backupData.keep;
             }
             set
             {
-                this.saveData.keep = value;
-                //OnUpdated(new UpdatedEventArgs("Keep"));
+                this.backupData.keep = value;
             }
         }
         public bool Active
         {
             get
             {
-                //string activePath = this.ActivePath;
                 foreach (var activePath in ActivePaths)
                 {
-                    if (File.Exists(activePath) && File.GetLastWriteTime(activePath).Ticks == this.SaveDateTime.Ticks)
+                    if (File.Exists(activePath) && File.GetLastWriteTime(activePath).Ticks == this.SaveDate.Ticks)
                     {
                         return true;
                     }
                 }
                 return false;
-            }/*
-            set
-            {
-                this.saveData.active = value;
-                //OnUpdated(new UpdatedEventArgs("Active"));
-            }*/
+            }
         }
 
         public string FileName
         {
             get
             {
-                return new FileInfo(this.saveData.savePath).Name;
+                return new FileInfo(this.backupData.backupPath).Name;
             }
         }
 
@@ -143,7 +124,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                return this.saveData.savePath;
+                return this.backupData.backupPath;
             }
         }
 
@@ -168,25 +149,15 @@ namespace ValheimSaveShield
             }
         }
 
-        private DateTime SaveDateTime
+        public SaveBackup(string backupPath)
         {
-            get
+            if (this.backupData.Equals(default(BackupData)))
             {
-                return File.GetLastWriteTime(this.saveData.savePath);
+                //this.backupData = new SaveData();
+                this.backupData.label = "";
             }
-        }
-
-        //public SaveBackup(DateTime saveDate)
-        public SaveBackup(string savePath)
-        {
-            if (this.saveData.Equals(default(SaveData)))
-            {
-                //this.saveData = new SaveData();
-                this.saveData.label = "";
-            }
-            this.saveData.savePath = savePath;
-            this.saveData.date = this.SaveDateTime;
-            this.saveData.keep = false;
+            this.backupData.backupPath = backupPath;
+            this.backupData.keep = false;
             
         }
 
@@ -227,7 +198,7 @@ namespace ValheimSaveShield
         {
             if (!inTxn)
             {
-                this.backupData = saveData;
+                this.backupDataBackup = backupData;
                 inTxn = true;
             }
         }
@@ -236,7 +207,7 @@ namespace ValheimSaveShield
         {
             if (inTxn)
             {
-                this.saveData = backupData;
+                this.backupData = backupDataBackup;
                 inTxn = false;
             }
         }
@@ -245,23 +216,15 @@ namespace ValheimSaveShield
         {
             if (inTxn)
             {
-                if (backupData.label !=saveData.label)
+                if (backupDataBackup.label != backupData.label)
                 {
                     OnUpdated(new UpdatedEventArgs("Label"));
                 }
-                if (backupData.date != saveData.date)
-                {
-                    OnUpdated(new UpdatedEventArgs("SaveDate"));
-                }
-                if (backupData.keep != saveData.keep)
+                if (backupDataBackup.keep != backupData.keep)
                 {
                     OnUpdated(new UpdatedEventArgs("Keep"));
                 }
-                /*if (!backupData.active.Equals(saveData.active))
-                {
-                    OnUpdated(new UpdatedEventArgs("Active"));
-                }*/
-                backupData = new SaveData();
+                backupDataBackup = new BackupData();
                 inTxn = false;
             }
         }
