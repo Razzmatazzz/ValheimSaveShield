@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
+using System.Collections;
 
 namespace ValheimSaveShield
 {
@@ -53,7 +54,11 @@ namespace ValheimSaveShield
         {
             get
             {
-                return new FileInfo(this.saveData.savePath).Name.Split('.')[0];
+                var fileName = new FileInfo(this.saveData.savePath).Name;
+                var parts = new ArrayList(FileName.Split('.'));
+                parts.RemoveAt(parts.Count - 1);
+                return string.Join(".", parts.ToArray()).Trim();
+                //return new FileInfo(this.saveData.savePath).Name.Split('.')[0];
             }
         }
         public string Type

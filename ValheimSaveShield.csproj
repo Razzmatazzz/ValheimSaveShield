@@ -127,6 +127,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SaveWatcher.cs" />
+    <Compile Include="SerializableStringDictionary.cs" />
     <Compile Include="SynchronizeDirectories.cs" />
     <Page Include="ExtraWorldFileEditWindow.xaml">
       <SubType>Designer</SubType>

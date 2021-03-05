@@ -22,20 +22,9 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <!--<RowDefinition x:Name="ForToolbar"  Height="45" />-->
             <RowDefinition x:Name="ForBackups"  Height="*" />
             <RowDefinition x:Name="ForStatusbar" Height="Auto" />
         </Grid.RowDefinitions>
-        <!--<Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <<Button x:Name="btnBackup" HorizontalAlignment="Left" VerticalAlignment="Top" Click="BtnBackup_Click" ToolTip="Backup current save" Margin="5" TabIndex="1" Grid.Column="0">
-                <DynamicResource ResourceKey="Save"/>
-            </Button>
-        </Grid>-->
         <TabControl Grid.Row="0" TabIndex="5">
             <TabItem x:Name="tabBackups" Header="Backups">
                 <DataGrid x:Name="dataBackups" SelectionMode="Single" CanUserDeleteRows="False" AutoGeneratingColumn="DataBackups_AutoGeneratingColumn" ContextMenuOpening="dataBackups_ContextMenuOpening">

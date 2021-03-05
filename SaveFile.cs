@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using System.Collections;
 
 namespace ValheimSaveShield
 {
@@ -36,7 +37,10 @@ namespace ValheimSaveShield
         {
             get
             {
-                return new FileInfo(this.filePath).Name.Split('.')[0];
+                var fileName = FileName;
+                var parts = new ArrayList(FileName.Split('.'));
+                parts.RemoveAt(parts.Count - 1);
+                return string.Join(".", parts.ToArray()).Trim();
             }
         }
 

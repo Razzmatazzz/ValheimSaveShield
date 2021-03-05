@@ -15,6 +15,7 @@ using ModernWpf;
 using System.Timers;
 using System.Collections.Specialized;
 using System.Collections;
+using RazzTools;
 
 namespace ValheimSaveShield
 {
@@ -126,22 +127,22 @@ namespace ValheimSaveShield
             }
             if (Properties.Settings.Default.WorldBackupLabel == null)
             {
-                Properties.Settings.Default.WorldBackupLabel = new StringDictionary();
+                Properties.Settings.Default.WorldBackupLabel = new SerializableStringDictionary();
                 Properties.Settings.Default.Save();
             }
             if (Properties.Settings.Default.WorldBackupKeep == null)
             {
-                Properties.Settings.Default.WorldBackupKeep = new StringDictionary();
+                Properties.Settings.Default.WorldBackupKeep = new SerializableStringDictionary();
                 Properties.Settings.Default.Save();
             }
             if (Properties.Settings.Default.CharBackupLabel == null)
             {
-                Properties.Settings.Default.CharBackupLabel = new StringDictionary();
+                Properties.Settings.Default.CharBackupLabel = new SerializableStringDictionary();
                 Properties.Settings.Default.Save();
             }
             if (Properties.Settings.Default.CharBackupKeep == null)
             {
-                Properties.Settings.Default.CharBackupKeep = new StringDictionary();
+                Properties.Settings.Default.CharBackupKeep = new SerializableStringDictionary();
                 Properties.Settings.Default.Save();
             }
             if (Properties.Settings.Default.WorldFileExtensions == null)
@@ -397,35 +398,39 @@ namespace ValheimSaveShield
         {
             if (!suppressLog)
             {
-                //txtLog.Text = txtLog.Text + Environment.NewLine + DateTime.Now.ToString() + ": " + msg;
-                Run run = new Run(DateTime.Now.ToString() + ": " + msg);
-                run.Foreground = new SolidColorBrush(color);
-                Paragraph paragraph = new Paragraph(run);
-                paragraph.Margin = new Thickness(0);
-                if (txtLog.Document.Blocks.Count > 0)
+                this.Dispatcher.Invoke(() =>
                 {
-                    txtLog.Document.Blocks.InsertBefore(txtLog.Document.Blocks.FirstBlock, paragraph);
-                }
-                else
-                {
-                    txtLog.Document.Blocks.Add(paragraph);
-                }
-                if (msg.Contains("\n"))
-                {
-                    lblLastMessage.Content = msg.Split('\n')[0];
-                } else
-                {
-                    lblLastMessage.Content = msg;
-                }
-                lblLastMessage.Foreground = new SolidColorBrush(color);
-                if (color.Equals(defaultTextColor))
-                {
-                    lblLastMessage.FontWeight = FontWeights.Normal;
-                }
-                else
-                {
-                    lblLastMessage.FontWeight = FontWeights.Bold;
-                }
+                    //txtLog.Text = txtLog.Text + Environment.NewLine + DateTime.Now.ToString() + ": " + msg;
+                    Run run = new Run(DateTime.Now.ToString() + ": " + msg);
+                    run.Foreground = new SolidColorBrush(color);
+                    Paragraph paragraph = new Paragraph(run);
+                    paragraph.Margin = new Thickness(0);
+                    if (txtLog.Document.Blocks.Count > 0)
+                    {
+                        txtLog.Document.Blocks.InsertBefore(txtLog.Document.Blocks.FirstBlock, paragraph);
+                    }
+                    else
+                    {
+                        txtLog.Document.Blocks.Add(paragraph);
+                    }
+                    if (msg.Contains("\n"))
+                    {
+                        lblLastMessage.Content = msg.Split('\n')[0];
+                    }
+                    else
+                    {
+                        lblLastMessage.Content = msg;
+                    }
+                    lblLastMessage.Foreground = new SolidColorBrush(color);
+                    if (color.Equals(defaultTextColor))
+                    {
+                        lblLastMessage.FontWeight = FontWeights.Normal;
+                    }
+                    else
+                    {
+                        lblLastMessage.FontWeight = FontWeights.Bold;
+                    }
+                });
             }
             if (Properties.Settings.Default.CreateLogFile)
             {
@@ -770,6 +775,7 @@ namespace ValheimSaveShield
             }
             foreach (DictionaryEntry entry in savedLabels)
             {
+                Debug.WriteLine($"label for {entry.Key.ToString()}: {entry.Value.ToString()}");
                 names.Add(long.Parse(entry.Key.ToString()), entry.Value.ToString());
             }
             return names;
@@ -787,6 +793,7 @@ namespace ValheimSaveShield
             }
             foreach (DictionaryEntry entry in savedKeeps)
             {
+                Debug.WriteLine($"Keeping {entry.Key.ToString()}");
                 keeps.Add(long.Parse(entry.Key.ToString()), bool.Parse(entry.Value.ToString()));
             }
             return keeps;
@@ -794,8 +801,8 @@ namespace ValheimSaveShield
 
         private void updateSavedLabels()
         {
-            var savedWorldLabels = new StringDictionary();
-            var savedCharLabels = new StringDictionary();
+            var savedWorldLabels = new SerializableStringDictionary();
+            var savedCharLabels = new SerializableStringDictionary();
             foreach (var s in listBackups) 
             {
                 if (s.Label != s.DefaultLabel)
@@ -808,6 +815,7 @@ namespace ValheimSaveShield
                     {
                         savedCharLabels.Add(s.SaveDate.Ticks.ToString(), s.Label);
                     }
+                    Debug.WriteLine($"adding label for {s.SaveDate.Ticks}: {s.Label}");
                 }
             }
             if (savedWorldLabels.Count > 0)
@@ -816,7 +824,7 @@ namespace ValheimSaveShield
             }
             else
             {
-                Properties.Settings.Default.WorldBackupLabel = new StringDictionary();
+                Properties.Settings.Default.WorldBackupLabel = new SerializableStringDictionary();
             }
             if (savedCharLabels.Count > 0)
             {
@@ -824,15 +832,15 @@ namespace ValheimSaveShield
             }
             else
             {
-                Properties.Settings.Default.CharBackupLabel = new StringDictionary();
+                Properties.Settings.Default.CharBackupLabel = new SerializableStringDictionary();
             }
             Properties.Settings.Default.Save();
         }
 
         private void updateSavedKeeps()
         {
-            StringDictionary savedWorldKeeps = new StringDictionary();
-            StringDictionary savedCharKeeps = new StringDictionary();
+            var savedWorldKeeps = new SerializableStringDictionary();
+            var savedCharKeeps = new SerializableStringDictionary();
             for (int i = 0; i < listBackups.Count; i++)
             {
                 SaveBackup s = listBackups[i];
@@ -853,7 +861,7 @@ namespace ValheimSaveShield
             }
             else
             {
-                Properties.Settings.Default.WorldBackupKeep = new StringDictionary();
+                Properties.Settings.Default.WorldBackupKeep = new SerializableStringDictionary();
             }
             if (savedCharKeeps.Count > 0)
             {
@@ -861,7 +869,7 @@ namespace ValheimSaveShield
             }
             else
             {
-                Properties.Settings.Default.CharBackupKeep = new StringDictionary();
+                Properties.Settings.Default.CharBackupKeep = new SerializableStringDictionary();
             }
             Properties.Settings.Default.Save();
         }
