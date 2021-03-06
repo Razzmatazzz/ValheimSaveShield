@@ -106,5 +106,44 @@ namespace ValheimSaveShield
                     "Timestamp of {0} kept with its default (current time)", e.Destination);
             }
         }
+
+        public static void uploadFile(string hostUrl, string port, string hostDirectory, string localFile, string userName, string password, FtpMode ftpMode)
+        {
+            try
+            {
+                // Setup session options
+                SessionOptions sessionOptions = new SessionOptions
+                {
+                    Protocol = Protocol.Ftp,
+                    HostName = hostUrl,
+                    PortNumber = Int32.Parse(port),
+                    UserName = userName,
+                    Password = password,
+                    FtpMode = ftpMode
+                };
+
+                using (Session session = new Session())
+                {
+                    // Will continuously report progress of synchronization
+                    session.FileTransferred += FileTransferred;
+
+                    // Connect
+                    session.Open(sessionOptions);
+
+                    // Upload
+                    var uploadResult = session.PutFileToDirectory(localFile, hostDirectory);
+
+                    // Throw on any error
+                    if (uploadResult.Error != null)
+                    {
+                        throw uploadResult.Error;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
 }

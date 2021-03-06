@@ -192,6 +192,28 @@ namespace ValheimSaveShield
                 }
             }
         }
+        public void RestoreFtp()
+        {
+            if (this.Type != "World")
+            {
+                throw new Exception("You can only restore world saves to the FTP location");
+            }
+            SynchronizeDirectories.uploadFile(Properties.Settings.Default.FtpIpAddress, Properties.Settings.Default.FtpPort, Properties.Settings.Default.FtpFilePath, this.FullPath, Properties.Settings.Default.FtpUsername, Properties.Settings.Default.FtpPassword, (WinSCP.FtpMode)Properties.Settings.Default.FtpMode);
+            if (this.Type == "World")
+            {
+                FileInfo info = new FileInfo(this.FullPath);
+                string sourcefwl = info.DirectoryName + "\\" + this.Name + ".fwl";
+                SynchronizeDirectories.uploadFile(Properties.Settings.Default.FtpIpAddress, Properties.Settings.Default.FtpPort, Properties.Settings.Default.FtpFilePath, sourcefwl, Properties.Settings.Default.FtpUsername, Properties.Settings.Default.FtpPassword, (WinSCP.FtpMode)Properties.Settings.Default.FtpMode);
+                foreach (var ext in Properties.Settings.Default.WorldFileExtensions)
+                {
+                    string sourcefile = info.DirectoryName + "\\" + this.Name + ext;
+                    if (File.Exists(sourcefile))
+                    {
+                        SynchronizeDirectories.uploadFile(Properties.Settings.Default.FtpIpAddress, Properties.Settings.Default.FtpPort, Properties.Settings.Default.FtpFilePath, sourcefile, Properties.Settings.Default.FtpUsername, Properties.Settings.Default.FtpPassword, (WinSCP.FtpMode)Properties.Settings.Default.FtpMode);
+                    }
+                }
+            }
+        }
 
         // Implements IEditableObject
         void IEditableObject.BeginEdit()

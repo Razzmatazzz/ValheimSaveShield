@@ -1087,6 +1087,17 @@ namespace ValheimSaveShield
             }
         }
 
+        private bool ftpSyncEnabled()
+        {
+            return !(Properties.Settings.Default.FtpIpAddress.Length == 0
+                            || Properties.Settings.Default.FtpPort.Length == 0
+                            || Properties.Settings.Default.FtpFilePath.Length == 0
+                            || Properties.Settings.Default.FtpSaveDest.Length == 0
+                            || Properties.Settings.Default.FtpUsername.Length == 0
+                            || Properties.Settings.Default.FtpPassword.Length == 0
+                        );
+        }
+
         private void syncDirectoriesAsync()
         {
             
@@ -1388,7 +1399,7 @@ namespace ValheimSaveShield
             SaveBackup selectedBackup = (SaveBackup)dataBackups.SelectedItem;
             menuBackupsRestore.Click -= menuBackupsRestore_Click;
             menuBackupsRestore.Items.Clear();
-            if (Properties.Settings.Default.SaveFolders.Count < 2)
+            if (Properties.Settings.Default.SaveFolders.Count < 2 && (!ftpSyncEnabled() || selectedBackup.Type != "World"))
             {
                 if (!File.Exists(selectedBackup.ActivePaths.First()) || File.GetLastWriteTime(selectedBackup.ActivePaths.First()) != selectedBackup.SaveDate)
                 {
@@ -1417,6 +1428,14 @@ namespace ValheimSaveShield
                         menuBackupsRestore.Items.Add(menu);
                     }
                 }
+                if (ftpSyncEnabled() && selectedBackup.Type == "World")
+                {
+                    MenuItem menu = new MenuItem();
+                    menu.Header = "ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath;
+                    menu.ToolTip = "Restore to the remote FTP import location";
+                    menu.Click += menuFtpRestore_Click;
+                    menuBackupsRestore.Items.Add(menu);
+                }
                 if (menuBackupsRestore.Items.Count > 0)
                 {
                     menuBackupsRestore.IsEnabled = true;
@@ -1436,6 +1455,24 @@ namespace ValheimSaveShield
             {
                 menuBackupsViewMap.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void menuFtpRestore_Click(object sender, RoutedEventArgs e)
+        {
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                try
+                {
+                    SaveBackup selectedBackup = (SaveBackup)dataBackups.SelectedItem;
+                    selectedBackup.RestoreFtp();
+                    logMessage($"{selectedBackup.Name} backup restored to {"ftp://" + Properties.Settings.Default.FtpIpAddress + ":" + Properties.Settings.Default.FtpPort + "/" + Properties.Settings.Default.FtpFilePath}!", LogType.Success);
+                }
+                catch (Exception ex)
+                {
+                    logMessage($"Error restoring save to FTP: {ex.Message}", LogType.Error);
+                }
+            }).Start();
         }
 
         private void menuBackupsRestore_Click(object sender, RoutedEventArgs e)
