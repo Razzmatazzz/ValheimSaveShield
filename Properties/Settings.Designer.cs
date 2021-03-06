@@ -49,9 +49,9 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringDictionary WorldBackupKeep {
+        public global::RazzTools.SerializableStringDictionary WorldBackupKeep {
             get {
-                return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupKeep"]));
+                return ((global::RazzTools.SerializableStringDictionary)(this["WorldBackupKeep"]));
             }
             set {
                 this["WorldBackupKeep"] = value;
@@ -60,9 +60,9 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringDictionary WorldBackupLabel {
+        public global::RazzTools.SerializableStringDictionary WorldBackupLabel {
             get {
-                return ((global::System.Collections.Specialized.StringDictionary)(this["WorldBackupLabel"]));
+                return ((global::RazzTools.SerializableStringDictionary)(this["WorldBackupLabel"]));
             }
             set {
                 this["WorldBackupLabel"] = value;
@@ -131,9 +131,9 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringDictionary CharBackupLabel {
+        public global::RazzTools.SerializableStringDictionary CharBackupLabel {
             get {
-                return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupLabel"]));
+                return ((global::RazzTools.SerializableStringDictionary)(this["CharBackupLabel"]));
             }
             set {
                 this["CharBackupLabel"] = value;
@@ -142,9 +142,9 @@ namespace ValheimSaveShield.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringDictionary CharBackupKeep {
+        public global::RazzTools.SerializableStringDictionary CharBackupKeep {
             get {
-                return ((global::System.Collections.Specialized.StringDictionary)(this["CharBackupKeep"]));
+                return ((global::RazzTools.SerializableStringDictionary)(this["CharBackupKeep"]));
             }
             set {
                 this["CharBackupKeep"] = value;

@@ -8,10 +8,10 @@
     <Setting Name="BackupMinutes" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="WorldBackupKeep" Type="System.Collections.Specialized.StringDictionary" Scope="User">
+    <Setting Name="WorldBackupKeep" Type="RazzTools.SerializableStringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WorldBackupLabel" GenerateDefaultValueInCode="false" Type="System.Collections.Specialized.StringDictionary" Scope="User">
+    <Setting Name="WorldBackupLabel" GenerateDefaultValueInCode="false" Type="RazzTools.SerializableStringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="BackupFolder" Type="System.String" Scope="User">
@@ -29,10 +29,10 @@
     <Setting Name="BackupLimit" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="CharBackupLabel" Type="System.Collections.Specialized.StringDictionary" Scope="User">
+    <Setting Name="CharBackupLabel" Type="RazzTools.SerializableStringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CharBackupKeep" Type="System.Collections.Specialized.StringDictionary" Scope="User">
+    <Setting Name="CharBackupKeep" Type="RazzTools.SerializableStringDictionary" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="FtpIpAddress" Type="System.String" Scope="User">
