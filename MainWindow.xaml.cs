@@ -16,6 +16,8 @@ using System.Timers;
 using System.Collections.Specialized;
 using System.Collections;
 using RazzTools;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace ValheimSaveShield
 {
@@ -24,8 +26,8 @@ namespace ValheimSaveShield
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static string defaultBackupFolder = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\AppData\LocalLow\IronGate\Valheim\backups";
-        private static string defaultSaveFolder = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\AppData\LocalLow\IronGate\Valheim";
+        private static string DefaultBackupFolder { get { return $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\AppData\LocalLow\IronGate\Valheim\backups"; } }
+        private static string DefaultSaveFolder { get { return $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\AppData\LocalLow\IronGate\Valheim"; } }
         private List<SaveBackup> listBackups;
         private Boolean suppressLog;
         private Color defaultTextColor;
@@ -37,6 +39,9 @@ namespace ValheimSaveShield
         private WindowState storedWindowState;
 
         private Thread ftpDirectorySync = null;
+
+        private readonly Mutex _mutex;
+        private const string mutexName = "MUTEX_VALHEIMSAVESHIELD";
 
         private bool IsBackupCurrent {
             get {
@@ -95,15 +100,36 @@ namespace ValheimSaveShield
 
         ~MainWindow()
         {
+            if (notifyIcon != null)
+            {
+                notifyIcon.Dispose();
+            }
             if (ftpDirectorySync != null)
             {
                 ftpDirectorySync.Abort();
+            }
+            if (_mutex != null)
+            {
+                _mutex.Dispose();
             }
         }
 
         public MainWindow()
         {
             InitializeComponent();
+            bool firstInstance;
+            _mutex = new Mutex(true, mutexName, out firstInstance);
+            if (!firstInstance)
+            {
+                NativeMethods.PostMessage(
+                    (IntPtr)NativeMethods.HWND_BROADCAST,
+                    NativeMethods.WM_SHOWME,
+                    IntPtr.Zero,
+                    IntPtr.Zero
+                );
+                Close();
+                return;
+            }
             suppressLog = false;
             if (Properties.Settings.Default.CreateLogFile)
             {
@@ -115,8 +141,10 @@ namespace ValheimSaveShield
             if (Properties.Settings.Default.UpgradeRequired)
             {
                 Properties.Settings.Default.Upgrade();
+                logMessage($"Previous backup folder: {Properties.Settings.Default.GetPreviousVersion("BackupFolder")}");
                 Properties.Settings.Default.UpgradeRequired = false;
                 Properties.Settings.Default.Save();
+                logMessage($"Current backup folder: {Properties.Settings.Default.BackupFolder}");
             }
             Width = Properties.Settings.Default.MainWindowWidth;
             Height = Properties.Settings.Default.MainWindowHeight;
@@ -150,20 +178,20 @@ namespace ValheimSaveShield
                 Properties.Settings.Default.WorldFileExtensions = new StringCollection();
                 Properties.Settings.Default.Save();
             }
-            if (Properties.Settings.Default.BackupFolder.Length == 0)
+            saveWatchers = new List<SaveWatcher>();
+            if (Properties.Settings.Default.BackupFolder == "")
             {
                 logMessage("Backup folder not set; reverting to default.");
-                Properties.Settings.Default.BackupFolder = defaultBackupFolder;
+                Properties.Settings.Default.BackupFolder = DefaultBackupFolder;
                 Properties.Settings.Default.Save();
             }
-            else if (!Directory.Exists(Properties.Settings.Default.BackupFolder) && !Properties.Settings.Default.BackupFolder.Equals(defaultBackupFolder))
+            else if (!Directory.Exists(Properties.Settings.Default.BackupFolder) && !Properties.Settings.Default.BackupFolder.Equals(DefaultBackupFolder))
             {
                 logMessage($"Backup folder {Properties.Settings.Default.BackupFolder}) not found; reverting to default.");
-                Properties.Settings.Default.BackupFolder = defaultBackupFolder;
+                Properties.Settings.Default.BackupFolder = DefaultBackupFolder;
                 Properties.Settings.Default.Save();
             }
-            saveWatchers = new List<SaveWatcher>();
-            if (Properties.Settings.Default.SaveFolders != null && Properties.Settings.Default.SaveFolders.Count > 0)
+            if (Properties.Settings.Default.SaveFolders.Count > 0)
             {
                 foreach (var path in Properties.Settings.Default.SaveFolders)
                 {
@@ -188,12 +216,12 @@ namespace ValheimSaveShield
             else
             {
                 logMessage("Reverting to default save folder.");
-                lstSaveFolders.Items.Add(defaultSaveFolder);
-                AddToSaveWatchers(defaultSaveFolder);
+                lstSaveFolders.Items.Add(DefaultSaveFolder);
+                AddToSaveWatchers(DefaultSaveFolder);
 
                 lstSaveFolders.Items.Refresh();
-                Properties.Settings.Default.SaveFolders.Add(defaultSaveFolder);
-                Properties.Settings.Default.FtpSaveDest = defaultSaveFolder;
+                Properties.Settings.Default.SaveFolders.Add(DefaultSaveFolder);
+                Properties.Settings.Default.FtpSaveDest = DefaultSaveFolder;
                 Properties.Settings.Default.Save();
             }
             // start the directory syncing if user has the correct settings for it
@@ -211,6 +239,35 @@ namespace ValheimSaveShield
             this.notifyIcon.Icon = ValheimSaveShield.Properties.Resources.vss;
             notifyIcon.Click += NotifyIcon_Click;
             storedWindowState = WindowState.Normal;
+        }
+        //This event is raised to support interoperation with Win32
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            HwndSource source = PresentationSource.FromVisual(this) as HwndSource;
+            source.AddHook(WndProc);
+        }
+        //Receive and act on messages
+        IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            // Handle messages...
+            if (msg == NativeMethods.WM_SHOWME)
+            {
+                Show();
+                Activate();
+                WindowState = storedWindowState;
+            }
+            return IntPtr.Zero;
+        }
+        //dll import magic
+        internal class NativeMethods
+        {
+            public const int HWND_BROADCAST = 0xffff;
+            public static readonly int WM_SHOWME = RegisterWindowMessage("WM_SHOWME");
+            [DllImport("user32")]
+            public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
+            [DllImport("user32")]
+            public static extern int RegisterWindowMessage(string message);
         }
 
         private void SaveWatcher_LogMessage(object sender, SaveWatcherLogMessageEventArgs e)
@@ -244,6 +301,7 @@ namespace ValheimSaveShield
         private void NotifyIcon_Click(object sender, EventArgs e)
         {
             Show();
+            Activate();
             WindowState = storedWindowState;
         }
 
@@ -960,12 +1018,18 @@ namespace ValheimSaveShield
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            notifyIcon.Dispose();
-            notifyIcon = null;
+            if (notifyIcon != null)
+            {
+                notifyIcon.Dispose();
+            }
             if (ftpDirectorySync != null)
             {
                 ftpDirectorySync.Abort();
                 ftpDirectorySync = null;
+            }
+            if (_mutex != null)
+            {
+                _mutex.Dispose();
             }
         }
 

@@ -226,7 +226,8 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)ModernWpf.dll" "$(TargetDir)app.publish\"
 copy "$(TargetDir)ValheimSaveShield.exe.config" "$(TargetDir)app.publish\"
-copy "$(TargetDir)WinSCPnet.dll" "$(TargetDir)app.publish\"</PostBuildEvent>
+copy "$(TargetDir)WinSCPnet.dll" "$(TargetDir)app.publish\"
+if $(ConfigurationName) == Release "C:\Program Files\7-Zip\7z.exe" a %25userprofile%25\Desktop\vss.zip "$(TargetDir)app.publish\*"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\WinSCP.5.17.10\build\WinSCP.targets" Condition="Exists('packages\WinSCP.5.17.10\build\WinSCP.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
