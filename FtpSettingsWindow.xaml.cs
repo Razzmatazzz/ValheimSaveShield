@@ -53,9 +53,10 @@ namespace ValheimSaveShield
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (txtWorldsPath.Text.StartsWith("/"))
+            if (!txtWorldsPath.Text.StartsWith("/"))
             {
-                txtWorldsPath.Text = txtWorldsPath.Text.Remove(0, 1);
+                //txtWorldsPath.Text = txtWorldsPath.Text.Remove(0, 1);
+                txtWorldsPath.Text = "/"+txtWorldsPath.Text;
             }
 
             if (txtWorldsPath.Text.EndsWith("/"))

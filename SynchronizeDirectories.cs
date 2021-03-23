@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using WinSCP;
 
 namespace ValheimSaveShield
@@ -35,7 +36,7 @@ namespace ValheimSaveShield
 
                     // Connect
                     session.Open(sessionOptions);
-
+                    
                     // Synchronize files
                     SynchronizationResult synchronizationResult;
                     synchronizationResult =
@@ -45,6 +46,56 @@ namespace ValheimSaveShield
 
                     // Throw on any error
                     synchronizationResult.Check();
+                }
+
+                return 0;
+            }
+            catch (Exception e)
+            {
+                _lasterror = e;
+                System.Diagnostics.Debug.WriteLine("Error: {0}", e);
+                return 1;
+            }
+        }
+
+        public static int downloadWorlds(string hostUrl, string port, string hostDirectory, string localDirectory, string userName, string password, FtpMode ftpMode)
+        {
+            try
+            {
+                // Setup session options
+                SessionOptions sessionOptions = new SessionOptions
+                {
+                    Protocol = Protocol.Ftp,
+                    HostName = hostUrl,
+                    PortNumber = Int32.Parse(port),
+                    UserName = userName,
+                    Password = password,
+                    FtpMode = ftpMode
+                };
+
+                using (Session session = new Session())
+                {
+                    // Will continuously report progress of synchronization
+                    session.FileTransferred += FileTransferred;
+
+                    // Connect
+                    session.Open(sessionOptions);
+
+                    //download
+                    //transfer .fwl files first since they don't trigger a backup
+                    var transferResult = session.GetFilesToDirectory(hostDirectory, localDirectory, "*.fwl");
+                    transferResult.Check();
+                    //transfer .db files next, but under a different file extension to delay triggering a backup
+                    transferResult = session.GetFiles($"{hostDirectory}/*.db", $@"{localDirectory}\*.dbftp");
+                    transferResult.Check();
+                    foreach (TransferEventArgs transfer in transferResult.Transfers)
+                    {
+                        //rename finished .db downloads to trigger a backup
+                        var dbName = transfer.Destination.Replace(".dbftp", ".db");
+                        if (File.Exists(dbName)) File.Delete(dbName);
+                        var fi = new FileInfo(transfer.Destination);
+                        fi.MoveTo(fi.FullName.Replace(transfer.Destination, dbName));
+                    }
                 }
 
                 return 0;

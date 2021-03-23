@@ -51,6 +51,13 @@ namespace ValheimSaveShield
                 return new FileInfo(this.filePath).Name;
             }
         }
+        public DateTime SaveTime
+        {
+            get
+            {
+                return new FileInfo(filePath).LastWriteTime;
+            }
+        }
 
         public string FullPath
         {
@@ -100,8 +107,8 @@ namespace ValheimSaveShield
         {
             get
             {
-                DateTime newBackupTime = this.BackupDueTime;
-                if (DateTime.Compare(DateTime.Now, newBackupTime) >= 0)
+                //DateTime newBackupTime = this.BackupDueTime;
+                if (DateTime.Compare(SaveTime, this.BackupDueTime) >= 0)
                 {
                     return true;
                 }

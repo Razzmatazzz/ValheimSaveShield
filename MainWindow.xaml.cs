@@ -141,10 +141,14 @@ namespace ValheimSaveShield
             if (Properties.Settings.Default.UpgradeRequired)
             {
                 Properties.Settings.Default.Upgrade();
-                logMessage($"Previous backup folder: {Properties.Settings.Default.GetPreviousVersion("BackupFolder")}");
+                //logMessage($"Previous backup folder: {Properties.Settings.Default.GetPreviousVersion("BackupFolder")}");
                 Properties.Settings.Default.UpgradeRequired = false;
+                if (!Properties.Settings.Default.FtpFilePath.StartsWith("/"))
+                {
+                    Properties.Settings.Default.FtpFilePath = "/" + Properties.Settings.Default.FtpFilePath;
+                }
                 Properties.Settings.Default.Save();
-                logMessage($"Current backup folder: {Properties.Settings.Default.BackupFolder}");
+                //logMessage($"Current backup folder: {Properties.Settings.Default.BackupFolder}");
             }
             Width = Properties.Settings.Default.MainWindowWidth;
             Height = Properties.Settings.Default.MainWindowHeight;
@@ -622,10 +626,10 @@ namespace ValheimSaveShield
             {
                 try
                 {
-                    if (e.FullPath.EndsWith(".old")) return;
-                    if (Properties.Settings.Default.AutoBackup)
+                    if (e.FullPath.EndsWith(".old") || !Properties.Settings.Default.AutoBackup) return;
+                    SaveFile save = new SaveFile(e.FullPath);
+                    if (!save.BackedUp)
                     {
-                        SaveFile save = new SaveFile(e.FullPath);
                         if (!saveTimers.ContainsKey(e.FullPath))
                         {
                             var saveTimer = new SaveTimer(save);
@@ -670,7 +674,7 @@ namespace ValheimSaveShield
                         {
                             this.IsBackupCurrent = false;
                             dataBackups.Items.Refresh();
-                            TimeSpan span = (timer.Save.BackupDueTime - DateTime.Now);
+                            TimeSpan span = (timer.Save.BackupDueTime - timer.Save.SaveTime);
                             logMessage($"Save change detected, but {span.Minutes + Math.Round(span.Seconds / 60.0, 2)} minutes left until next backup is due.");
                         });
                     }
@@ -1185,10 +1189,10 @@ namespace ValheimSaveShield
                         }
 
                         System.Diagnostics.Debug.WriteLine("re-syncing");
-                        int syncstatus = SynchronizeDirectories.remoteSync(
+                        int syncstatus = SynchronizeDirectories.downloadWorlds(
                             Properties.Settings.Default.FtpIpAddress,
                             Properties.Settings.Default.FtpPort,
-                            '/' + Properties.Settings.Default.FtpFilePath,
+                            Properties.Settings.Default.FtpFilePath,
                             Properties.Settings.Default.FtpSaveDest + "\\worlds",
                             Properties.Settings.Default.FtpUsername,
                             Properties.Settings.Default.FtpPassword,
