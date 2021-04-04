@@ -231,8 +231,6 @@ namespace ValheimSaveShield
             // start the directory syncing if user has the correct settings for it
             syncDirectoriesAsync();
 
-            chkCreateLogFile.IsChecked = Properties.Settings.Default.CreateLogFile;
-
             saveTimers = new Dictionary<string, SaveTimer>();
 
             listBackups = new List<SaveBackup>();
@@ -311,6 +309,10 @@ namespace ValheimSaveShield
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (Properties.Settings.Default.StartMinimized)
+            {
+                this.WindowState = WindowState.Minimized;
+            }
             loadBackups();
             txtBackupFolder.Text = Properties.Settings.Default.BackupFolder;
 
@@ -319,6 +321,8 @@ namespace ValheimSaveShield
             txtBackupMins.Text = Properties.Settings.Default.BackupMinutes.ToString();
             txtBackupLimit.Text = Properties.Settings.Default.BackupLimit.ToString();
             chkAutoCheckUpdate.IsChecked = Properties.Settings.Default.AutoCheckUpdate;
+            chkCreateLogFile.IsChecked = Properties.Settings.Default.CreateLogFile;
+            chkStartMinimized.IsChecked = Properties.Settings.Default.StartMinimized;
 
             if (Properties.Settings.Default.AutoCheckUpdate)
             {
@@ -1125,13 +1129,19 @@ namespace ValheimSaveShield
 
         private void chkCreateLogFile_Click(object sender, RoutedEventArgs e)
         {
-            bool newValue = chkCreateLogFile.IsChecked.HasValue ? chkCreateLogFile.IsChecked.Value : false;
-            if (newValue & !Properties.Settings.Default.CreateLogFile)
+            try
             {
-                System.IO.File.WriteAllText("log.txt", DateTime.Now.ToString() + ": Version " + typeof(MainWindow).Assembly.GetName().Version + "\r\n");
+                bool newValue = chkCreateLogFile.IsChecked.GetValueOrDefault();
+                if (newValue & !Properties.Settings.Default.CreateLogFile)
+                {
+                    System.IO.File.WriteAllText("log.txt", DateTime.Now.ToString() + ": Version " + typeof(MainWindow).Assembly.GetName().Version + "\r\n");
+                }
+                Properties.Settings.Default.CreateLogFile = newValue;
+                Properties.Settings.Default.Save();
+            } catch (Exception ex)
+            {
+                logMessage($"Error changing log option: {ex.Message}");
             }
-            Properties.Settings.Default.CreateLogFile = newValue;
-            Properties.Settings.Default.Save();
         }
 
         private void chkAutoCheckUpdate_Click(object sender, RoutedEventArgs e)
@@ -1632,6 +1642,12 @@ namespace ValheimSaveShield
             {
                 menuBackups.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void chkStartMinimized_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.StartMinimized = chkStartMinimized.IsChecked.GetValueOrDefault();
+            Properties.Settings.Default.Save();
         }
     }
 

@@ -65,6 +65,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <CheckBox x:Name="chkAutoBackup" Content="Automatically backup save files" ToolTip="Monitor save files and back them up when they're changed" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Top" Click="ChkAutoBackup_Click" Grid.Row="0" Checked="ChkAutoBackup_Click" Unchecked="ChkAutoBackup_Click"/>
                     <Grid Grid.Row="1">
@@ -143,7 +144,8 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Grid.Row="0" Checked="chkCreateLogFile_Click" Unchecked="chkCreateLogFile_Click"/>
+                        <CheckBox x:Name="chkCreateLogFile" Content="Create log file" ToolTip="Whether a log.txt file should be created" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Checked="chkCreateLogFile_Click" Unchecked="chkCreateLogFile_Click"/>
+                        <CheckBox x:Name="chkStartMinimized" Content="Start minimized" ToolTip="Minimize app on startup" HorizontalAlignment="Left" Margin="10,2,0,2" VerticalAlignment="Center" Grid.Row="0" Grid.Column="1" Checked="chkStartMinimized_Checked" Unchecked="chkStartMinimized_Checked"/>
                         <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Checked="chkAutoCheckUpdate_Click"/>
                         <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="10,5,0,5" VerticalAlignment="Center" Click="btnAppUpdate_Click" Grid.Row="1" Grid.Column="1" />
                     </Grid>
