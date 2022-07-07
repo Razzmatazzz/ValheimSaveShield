@@ -47,11 +47,11 @@ namespace ValheimSaveShield
             get {
                 foreach (var saveDirPath in Properties.Settings.Default.SaveFolders)
                 {
-                    if (!Directory.Exists($@"{saveDirPath}\worlds"))
+                    if (!Directory.Exists($@"{saveDirPath}\worlds_local"))
                     {
                         return false;
                     }
-                    var worlds = Directory.GetFiles($@"{saveDirPath}\worlds", "*.db");
+                    var worlds = Directory.GetFiles($@"{saveDirPath}\worlds_local", "*.db");
                     foreach (string world in worlds)
                     {
                         SaveFile save = new SaveFile(world);
@@ -60,7 +60,7 @@ namespace ValheimSaveShield
                             return false;
                         }
                     }
-                    var characters = Directory.GetFiles($@"{saveDirPath}\characters", "*.fch");
+                    var characters = Directory.GetFiles($@"{saveDirPath}\characters_local", "*.fch");
                     foreach (string character in characters)
                     {
                         SaveFile save = new SaveFile(character);
@@ -340,18 +340,18 @@ namespace ValheimSaveShield
                 {
                     logMessage("Backups folder not found, creating...");
                     Directory.CreateDirectory(backupDirPath);
-                    Directory.CreateDirectory($@"{backupDirPath}\worlds");
-                    Directory.CreateDirectory($@"{backupDirPath}\characters");
+                    Directory.CreateDirectory($@"{backupDirPath}\worlds_local");
+                    Directory.CreateDirectory($@"{backupDirPath}\characters_local");
                 }
                 else
                 {
-                    if (!Directory.Exists($@"{backupDirPath}\worlds"))
+                    if (!Directory.Exists($@"{backupDirPath}\worlds_local"))
                     {
-                        Directory.CreateDirectory($@"{backupDirPath}\worlds");
+                        Directory.CreateDirectory($@"{backupDirPath}\worlds_local");
                     }
-                    if (!Directory.Exists($@"{backupDirPath}\characters"))
+                    if (!Directory.Exists($@"{backupDirPath}\characters_local"))
                     {
-                        Directory.CreateDirectory($@"{backupDirPath}\characters");
+                        Directory.CreateDirectory($@"{backupDirPath}\characters_local");
                     }
                 }
 
@@ -359,10 +359,10 @@ namespace ValheimSaveShield
                 listBackups.Clear();
                 Dictionary<long, string> backupWorldNames = getBackupNames("World");
                 Dictionary<long, bool> backupWorldKeeps = getBackupKeeps("World");
-                string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds");
+                string[] worldBackups = Directory.GetDirectories(backupDirPath + "\\worlds_local");
                 foreach (string w in worldBackups)
                 {
-                    //string name = w.Replace($@"{backupDirPath}\worlds", "");
+                    //string name = w.Replace($@"{backupDirPath}\worlds_local", "");
                     string[] backupDirs = Directory.GetDirectories(w);
                     foreach (string backupDir in backupDirs)
                     {
@@ -387,10 +387,10 @@ namespace ValheimSaveShield
 
                 Dictionary<long, string> backupCharNames = getBackupNames("Character");
                 Dictionary<long, bool> backupCharKeeps = getBackupKeeps("Character");
-                string[] charBackups = Directory.GetDirectories($@"{backupDirPath}\characters");
+                string[] charBackups = Directory.GetDirectories($@"{backupDirPath}\characters_local");
                 foreach (string c in charBackups)
                 {
-                    //string name = c.Replace($@"{backupDirPath}\characters", "");
+                    //string name = c.Replace($@"{backupDirPath}\characters_local", "");
                     string[] backupDirs = Directory.GetDirectories(c);
                     foreach (string backupDir in backupDirs)
                     {
@@ -512,16 +512,16 @@ namespace ValheimSaveShield
         {
             foreach (var saveDirPath in Properties.Settings.Default.SaveFolders)
             {
-                string[] worlds = Directory.GetFiles($@"{saveDirPath}\worlds", "*.db");
+                string[] worlds = Directory.GetFiles($@"{saveDirPath}\worlds_local", "*.db");
                 foreach (string save in worlds)
                 {
                     doBackup(save);
                 }
-                if (!Directory.Exists($@"{saveDirPath}\characters"))
+                if (!Directory.Exists($@"{saveDirPath}\characters_local"))
                 {
-                    Directory.CreateDirectory($@"{saveDirPath}\characters");
+                    Directory.CreateDirectory($@"{saveDirPath}\characters_local");
                 }
-                string[] characters = Directory.GetFiles($@"{saveDirPath}\characters", "*.fch");
+                string[] characters = Directory.GetFiles($@"{saveDirPath}\characters_local", "*.fch");
                 foreach (string save in characters)
                 {
                     doBackup(save);
@@ -1080,13 +1080,13 @@ namespace ValheimSaveShield
                 }
                 txtBackupFolder.Text = folderName;
                 backupDirPath = folderName;
-                if (!Directory.Exists($@"{backupDirPath}\worlds"))
+                if (!Directory.Exists($@"{backupDirPath}\worlds_local"))
                 {
-                    Directory.CreateDirectory($@"{backupDirPath}\worlds");
+                    Directory.CreateDirectory($@"{backupDirPath}\worlds_local");
                 }
-                if (!Directory.Exists($@"{backupDirPath}\characters"))
+                if (!Directory.Exists($@"{backupDirPath}\characters_local"))
                 {
-                    Directory.CreateDirectory($@"{backupDirPath}\characters");
+                    Directory.CreateDirectory($@"{backupDirPath}\characters_local");
                 }
                 Properties.Settings.Default.BackupFolder = folderName;
                 Properties.Settings.Default.Save();
@@ -1203,7 +1203,7 @@ namespace ValheimSaveShield
                             Properties.Settings.Default.FtpIpAddress,
                             Properties.Settings.Default.FtpPort,
                             Properties.Settings.Default.FtpFilePath,
-                            Properties.Settings.Default.FtpSaveDest + "\\worlds",
+                            Properties.Settings.Default.FtpSaveDest + "\\worlds_local",
                             Properties.Settings.Default.FtpUsername,
                             Properties.Settings.Default.FtpPassword,
                             (WinSCP.FtpMode)Properties.Settings.Default.FtpMode
@@ -1361,14 +1361,14 @@ namespace ValheimSaveShield
                         return;
                     }
                 }
-                if (!Directory.Exists($@"{folderName}\worlds"))
+                if (!Directory.Exists($@"{folderName}\worlds_local"))
                 {
-                    Directory.CreateDirectory($@"{folderName}\worlds");
-                    logMessage($"{folderName} did not contain a \"worlds\" folder, so it may not be a valid save location.");
+                    Directory.CreateDirectory($@"{folderName}\worlds_local");
+                    logMessage($"{folderName} did not contain a \"worlds_local\" folder, so it may not be a valid save location.");
                 }
-                if (!Directory.Exists($@"{folderName}\characters"))
+                if (!Directory.Exists($@"{folderName}\characters_local"))
                 {
-                    Directory.CreateDirectory($@"{folderName}\characters");
+                    Directory.CreateDirectory($@"{folderName}\characters_local");
                 }
                 lstSaveFolders.Items.Add(folderName);
                 lblSaveFolders.Content = "Save Folders";
@@ -1403,14 +1403,14 @@ namespace ValheimSaveShield
                         return;
                     }
                 }
-                if (!Directory.Exists($@"{folderName}\worlds"))
+                if (!Directory.Exists($@"{folderName}\worlds_local"))
                 {
-                    Directory.CreateDirectory($@"{folderName}\worlds");
-                    logMessage($"{folderName} did not contain a \"worlds\" folder, so it may not be a valid save location.");
+                    Directory.CreateDirectory($@"{folderName}\worlds_local");
+                    logMessage($"{folderName} did not contain a \"worlds_local\" folder, so it may not be a valid save location.");
                 }
-                if (!Directory.Exists($@"{folderName}\characters"))
+                if (!Directory.Exists($@"{folderName}\characters_local"))
                 {
-                    Directory.CreateDirectory($@"{folderName}\characters");
+                    Directory.CreateDirectory($@"{folderName}\characters_local");
                 }
                 lstSaveFolders.Items[lstSaveFolders.SelectedIndex] = folderName;
                 foreach (var swatcher in saveWatchers)

@@ -22,7 +22,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (new FileInfo(this.filePath).Directory.FullName.EndsWith("\\worlds"))
+                if (new FileInfo(this.filePath).Directory.FullName.EndsWith("\\worlds_local"))
                 {
                     return "World";
                 }
@@ -75,7 +75,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                return Properties.Settings.Default.BackupFolder + "\\" + this.Type.ToLower() + "s\\" + this.Name;
+                return Properties.Settings.Default.BackupFolder + "\\" + this.Type.ToLower() + "s_local\\" + this.Name;
             }
         }
 
@@ -145,7 +145,7 @@ namespace ValheimSaveShield
             int copyAttempts = 0;
             try
             {
-                string backupFolder = $@"{Properties.Settings.Default.BackupFolder}\{this.Type.ToLower()}s\{this.Name}\{File.GetLastWriteTime(this.FullPath).Ticks}";
+                string backupFolder = $@"{Properties.Settings.Default.BackupFolder}\{this.Type.ToLower()}s_local\{this.Name}\{File.GetLastWriteTime(this.FullPath).Ticks}";
                 if (!Directory.Exists(backupFolder))
                 {
                     Directory.CreateDirectory(backupFolder);

@@ -63,7 +63,7 @@ namespace ValheimSaveShield
         {
             get
             {
-                if (new FileInfo(this.backupData.backupPath).Directory.FullName.StartsWith($@"{Properties.Settings.Default.BackupFolder}\worlds\"))
+                if (new FileInfo(this.backupData.backupPath).Directory.FullName.StartsWith($@"{Properties.Settings.Default.BackupFolder}\worlds_local\"))
                 {
                     return "World";
                 }
