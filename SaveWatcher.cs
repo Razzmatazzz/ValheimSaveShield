@@ -23,11 +23,11 @@ namespace ValheimSaveShield
             }
             SavePath = path;
             WorldWatcher = new FileSystemWatcher();
-            if (!Directory.Exists($@"{path}\worlds"))
+            if (!Directory.Exists($@"{path}\worlds_local"))
             {
-                Directory.CreateDirectory($@"{path}\worlds");
+                Directory.CreateDirectory($@"{path}\worlds_local");
             }
-            WorldWatcher.Path = $@"{path}\worlds";
+            WorldWatcher.Path = $@"{path}\worlds_local";
 
             // Watch for changes in LastWrite times.
             WorldWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;
@@ -36,11 +36,11 @@ namespace ValheimSaveShield
             WorldWatcher.Filter = "*.db";
 
             CharacterWatcher = new FileSystemWatcher();
-            if (!Directory.Exists($@"{path}\characters"))
+            if (!Directory.Exists($@"{path}\characters_local"))
             {
-                Directory.CreateDirectory($@"{path}\characters");
+                Directory.CreateDirectory($@"{path}\characters_local");
             }
-            CharacterWatcher.Path = $@"{path}\characters";
+            CharacterWatcher.Path = $@"{path}\characters_local";
 
             // Watch for changes in LastWrite and file creation times.
             CharacterWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName;

@@ -149,7 +149,7 @@
                         <CheckBox x:Name="chkAutoCheckUpdate" Content="Automatically check for update" HorizontalAlignment="Left" Margin="10,5" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Checked="chkAutoCheckUpdate_Click"/>
                         <Button x:Name="btnAppUpdate" Content="Check Now" ToolTip="Check to see if there's a new version of this program available" HorizontalAlignment="Left" Margin="10,5,0,5" VerticalAlignment="Center" Click="btnAppUpdate_Click" Grid.Row="1" Grid.Column="1" />
                     </Grid>
-                    <Button x:Name="btnExtraWorldFiles" Content="Extra world files" ToolTip="Back up additional files from your /worlds folder" HorizontalAlignment="Left" Margin="10,5" Grid.Row="4" Click="btnExtraWorldFiles_Click"/>
+                    <Button x:Name="btnExtraWorldFiles" Content="Extra world files" ToolTip="Back up additional files from your /worlds_local folder" HorizontalAlignment="Left" Margin="10,5" Grid.Row="4" Click="btnExtraWorldFiles_Click"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="tabLog" Header="Log">
