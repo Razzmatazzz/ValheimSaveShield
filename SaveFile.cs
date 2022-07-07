@@ -120,6 +120,10 @@ namespace ValheimSaveShield
         {
             get
             {
+                if (!Directory.Exists(this.BackupsPath))
+                {
+                    Directory.CreateDirectory(this.BackupsPath);
+                }
                 string[] backups = Directory.GetDirectories(this.BackupsPath);
                 SaveBackup latestBackup = null;
                 foreach (string bdir in backups)
